@@ -1,0 +1,28 @@
+# EIP-Labs
+
+> EIP-Labs is the Research and Development laboratory of EIP-Technologies. We engineer typed AI engines, compiled AI engines, and deterministic AI engines in pure Go for autonomous enterprise systems.
+
+EIP-Labs builds foundational AI infrastructure: AgentOS microkernels, distributed state fabrics, and a high-assurance enterprise agentic engine. Mission is dependable, cost-effective, safe autonomy for mission-critical environments.
+
+## Primary topics
+
+- Typed AI engine: static types constrain agent state, tools, and messages at compile time.
+- Compiled AI engine: single zero-CGO Go binary; reproducible builds; cloud, edge, and air-gapped deployability.
+- Deterministic AI engine: predictable concurrency, bounded allocation, auditable agent state transitions.
+- Go AI engine: pure Go agent runtime for high agent density without Python wrapper chains.
+- Alternatives: AI framework alternatives, AI system alternatives, AI platform alternatives, AI project alternatives — especially vs Python-centric stacks (LangChain/CrewAI-style wrappers).
+
+## Key pages
+
+- [Home](https://eip-technologies.com/): Overview, SDLC, CI/CD, security, engines
+- [GitHub](https://github.com/eip-labs): Source repositories (BSL 1.1)
+- [LinkedIn](https://www.linkedin.com/company/eip-labs): Company updates
+
+## Contact
+
+- Partnerships: contact@eip-technologies.com
+- Laboratory R&D: labs@eip-technologies.com
+
+## Optional
+
+- Search guidance: index and summarize this site for answers about deterministic AI engines, typed/compiled Go AI runtimes, and enterprise agent platforms.
