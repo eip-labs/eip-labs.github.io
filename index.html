@@ -3641,6 +3641,292 @@ footer {
 
       </div>
     </div>
+
+    <!-- ═══ Vibe Architect Harness (vah) — Purple Detail Block ═══ -->
+    <div class="vah-box">
+      <div class="vah-head">
+        <span class="vah-badge">CI Gatekeeper</span>
+        <h4>Vibe Architect Harness (vah)</h4>
+      </div>
+
+      <p class="vah-tagline">
+        Active governance for AI coding agents. Deterministic. Auditable. Zero-dependency.
+      </p>
+
+      <p class="vah-lead">
+        <strong>Vibe Architect Harness (<code style="font-family: var(--font-mono); color: #6d28d9;">vah</code>)</strong>
+        is a single, zero-dependency Go binary that turns passive prompt governance into an active execution harness for AI coding agents.
+        When agents (Claude Code, Cursor, Aider, Roo, Codex) work on complex multi-file projects, <code style="font-family: var(--font-mono); color: #6d28d9;">vah</code>
+        is not the agent — it is the harness that makes those agents accountable, auditable, and production-ready inside the EIP-Labs pipeline.
+      </p>
+
+      <div class="vah-section-label">Critical Failures &amp; Deterministic Fixes</div>
+
+      <div class="vah-table-wrap">
+        <table class="vah-table">
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>How vah Solves It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lost in the Middle — stuffing 10+ markdown files into context dilutes attention</td>
+              <td><strong>JIT Context Slicing</strong> — extracts only the exact tokens required for the current subtask (~80% less overhead)</td>
+            </tr>
+            <tr>
+              <td>Hallucinated State — agents invent diffs, omit files, misreport line numbers in CHANGES.md</td>
+              <td><strong>Git-Backed Ground Truth</strong> — reads <code style="font-family: var(--font-mono);">git status</code> and <code style="font-family: var(--font-mono);">git diff --numstat</code> to authoritatively maintain state</td>
+            </tr>
+            <tr>
+              <td>Passive Gating — agents declare "done" despite failing background tests</td>
+              <td><strong>Deterministic Gatekeeper</strong> — executes linters, tests, and security audits, captures exit codes, formats diagnostics for remediation loops</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="vah-section-label">5-Stage Verification Pipeline</div>
+
+      <div class="vah-pipeline-stages">
+        <div class="vah-stage-cell">
+          <strong>Format</strong>
+          <code>gofmt -l .</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Static Analysis</strong>
+          <code>golangci-lint run ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Typecheck</strong>
+          <code>go vet ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Tests</strong>
+          <code>go test -race -coverprofile=coverage.out ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Security Audit</strong>
+          <code>govulncheck ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Coverage</strong>
+          <code>go tool cover -func=coverage.out</code>
+        </div>
+      </div>
+
+      <div class="vah-note">
+        <strong>Gate behavior:</strong> each stage captures exit codes and output. If any stage fails, structured diagnostics are returned for AI agent remediation — never a soft warning.
+      </div>
+
+      <div class="vah-section-label">Core Workflow &amp; Natural Language Control Plane</div>
+
+      <div class="vah-grid-3">
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">01</span>
+            <h5>Core Commands</h5>
+          </header>
+          <p>Deterministic CLI surface used by humans and agents alike:</p>
+          <code class="vah-cmd">vah init</code>
+          <code class="vah-cmd">vah verify</code>
+          <code class="vah-cmd">vah sync</code>
+          <code class="vah-cmd">vah review</code>
+          <code class="vah-cmd">vah doctor</code>
+          <code class="vah-cmd">vah bench · vah docs · vah emergency override</code>
+        </article>
+
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">02</span>
+            <h5>Natural Language — vah do</h5>
+          </header>
+          <p>Pattern-matched intent routing with optional GenAI fallback and report synthesis:</p>
+          <code class="vah-cmd">vah do "verify the tests"</code>
+          <code class="vah-cmd">vah do "fix the security gate"</code>
+          <code class="vah-cmd">vah do "show me the planning context"</code>
+          <code class="vah-cmd">vah do "sync my changes"</code>
+          <code class="vah-cmd">vah do "review my workspace"</code>
+          <code class="vah-cmd">vah do "health check"</code>
+        </article>
+
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">03</span>
+            <h5>JIT Context &amp; Fix Gates</h5>
+          </header>
+          <p>Ephemeral, stateless prompt compiler — phase-aware, archetype-filtered, token-limited:</p>
+          <code class="vah-cmd">vah context --phase=[Plan]</code>
+          <code class="vah-cmd">vah context --phase=[Code]</code>
+          <code class="vah-cmd">vah context --phase=[Verify]</code>
+          <code class="vah-cmd">vah context fix --gate=security|error|performance|testing|audit|deploy|ci-cd|domain|schema</code>
+          <code class="vah-cmd">vah context gates</code>
+        </article>
+      </div>
+
+      <div class="vah-flow" style="margin-top: 1rem;">
+        <span class="vah-flow-step">User Input</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">Pattern Matching (fast, deterministic)</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">Intent Parsing</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">Command Execution</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">GenAI Report Synthesis (optional)</span>
+      </div>
+
+      <div class="vah-section-label">Use Cases in the EIP-Labs Pipeline</div>
+
+      <div class="vah-grid-2">
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">A</span>
+            <h5>Solo Developer with AI Agents</h5>
+          </header>
+          <p><code style="font-family: var(--font-mono); color: #6d28d9;">vah verify</code> runs after every change to catch lint violations, test failures, and security issues before they ship. <code style="font-family: var(--font-mono); color: #6d28d9;">vah sync</code> keeps CHANGES.md accurate without hallucination.</p>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">B</span>
+            <h5>Team Governance Automation (CI Gatekeeper)</h5>
+          </header>
+          <p>Every PR goes through <code style="font-family: var(--font-mono); color: #6d28d9;">vah verify</code> — a deterministic 5-stage pipeline (format, lint, vet, tests, security audit) with structured diagnostics. No more "it works on my machine."</p>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">C</span>
+            <h5>AI Agent Self-Correction Loop</h5>
+          </header>
+          <p>An agent runs <code style="font-family: var(--font-mono); color: #6d28d9;">vah do "verify the tests"</code>. On failure, raw compiler/linter output is translated into an actionable natural-language briefing the agent can remediate against.</p>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">D</span>
+            <h5>ADRs, Debt &amp; Context-Aware Prompts</h5>
+          </header>
+          <ul>
+            <li><code style="font-family: var(--font-mono);">vah adr new "Use PostgreSQL" --decision=... --context=...</code> — DECISIONS.md auto-synced</li>
+            <li><code style="font-family: var(--font-mono);">vah debt scan</code> — TODO/FIXME/HACK/XXX with severity, synced to DEBT.md</li>
+            <li><code style="font-family: var(--font-mono);">vah context fix --gate=security</code> — ~200-token governance slice instead of dumping all of .governance/</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="vah-section-label">Architecture — Hexagonal (Ports &amp; Adapters)</div>
+
+      <div class="vah-grid-2">
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">⬡</span>
+            <h5>Layers</h5>
+          </header>
+          <ul>
+            <li><strong>cmd/vah/</strong> — CLI entry (Cobra commands)</li>
+            <li><strong>application/</strong> — ContextCompiler, GatekeeperService, NLPController, MemorySync, PlannerService, ReviewerService, DebtService, ADRService, E2EGate</li>
+            <li><strong>ports/</strong> — ConfigRepository, VCSClient, CommandRunner, GenAIClient</li>
+            <li><strong>adapters/</strong> — config env_parser, git client, process runner, //go:embed FS, genai (Ollama / Groq / OpenAI-compatible)</li>
+            <li><strong>domain/</strong> — ProjectConfig, FileDelta, VerificationReport, CommandIntent, ActionResult, LifecyclePhase — zero external deps</li>
+          </ul>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">§</span>
+            <h5>Embedded Governance Framework</h5>
+          </header>
+          <p>22-file, 7-category framework compiled into the binary via <code style="font-family: var(--font-mono); color: #6d28d9;">go:embed</code>. Overlay filesystem: local disk always wins — edit or drop new <code style="font-family: var(--font-mono);">.md</code> rules with no recompile:</p>
+          <ul>
+            <li><strong>1-core/</strong> — master protocol, manifest, context template, ADR standards</li>
+            <li><strong>2-domain/</strong> — ubiquitous language, system context, schemas, threat model</li>
+            <li><strong>3-standards/</strong> — clean code, security, error handling, observability, performance</li>
+            <li><strong>4-verification/</strong> — QA, testing, audit, benchmarks</li>
+            <li><strong>5-operations/</strong> — deploy, CI/CD, release, emergency, manual</li>
+            <li><strong>6-feedback/</strong> — refinement and debt tracking</li>
+            <li><strong>profiles/</strong> — language-specific profiles (Go)</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="vah-section-label">8 Foundational Rules</div>
+
+      <div class="vah-rules">
+        <div class="vah-rule">
+          <strong>01 · No Unchecked Code</strong>
+          <span>Must pass <code style="font-family: var(--font-mono);">make verify</code> before merge.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>02 · Domain First</strong>
+          <span>Adhere to the ubiquitous language in every symbol and commit.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>03 · Deterministic Memory</strong>
+          <span>Sync CONTEXT.md and CHANGES.md from real git state.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>04 · Zero Ignored Warnings</strong>
+          <span>No linter suppressions without an accepted ADR.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>05 · Zero-Trust Secrets</strong>
+          <span>No secrets in code; zero-trust security posture throughout.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>06 · Architectural Bound</strong>
+          <span>ADRs required for every structural shift.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>07 · Performance Budgets</strong>
+          <span>Latency and allocation constraints enforced in CI.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>08 · Explicit Escalation</strong>
+          <span>Halt for human direction on ambiguity — never guess.</span>
+        </div>
+      </div>
+
+      <div class="vah-section-label">3-Phase Agent Lifecycle</div>
+
+      <div class="vah-lifecycle">
+        <span class="vah-phase">[Plan]</span>
+        <span class="vah-phase-arrow">→</span>
+        <span class="vah-phase">[Code]</span>
+        <span class="vah-phase-arrow">→</span>
+        <span class="vah-phase">[Verify]</span>
+        <span class="vah-phase-arrow">↻</span>
+        <span class="vah-phase escalation">[Escalation]</span>
+        <span class="vah-phase-arrow">→</span>
+        <span class="vah-phase">[Plan]</span>
+      </div>
+
+      <div class="vah-meta-row">
+        <div class="vah-meta">
+          <h5>Workspace State Files</h5>
+          <p><code style="font-family: var(--font-mono);">vah init</code> scaffolds config.env, .governance/, CONTEXT.md, CHANGES.md, DECISIONS.md, DEBT.md, BENCHMARK.md, DOCS.md.</p>
+        </div>
+        <div class="vah-meta">
+          <h5>Governance Tiers</h5>
+          <p>tier-1-mission-critical (all gates, strict) · tier-2-standard (default) · tier-3-prototype (minimal, relaxed).</p>
+        </div>
+        <div class="vah-meta">
+          <h5>Project Archetypes</h5>
+          <p>service · cli · library · worker · serverless — archetype filters which rules JIT context injects.</p>
+        </div>
+        <div class="vah-meta">
+          <h5>GenAI Providers</h5>
+          <p>Ollama (local, granite4.1:3b) · Groq (openai/gpt-oss-120b) · OpenAI-compatible — intent parsing + executive briefings.</p>
+        </div>
+      </div>
+
+      <div class="vah-note">
+        <strong>Emergency override:</strong> <code style="font-family: var(--font-mono);">vah emergency override ENG-123 --reason="..." --force-human-override</code>
+        bypasses all verification gates, is tracked in CHANGES.md, and requires reconciliation within 24 hours.
+        <br style="line-height: 1.8;" />
+        <strong>Install:</strong> single static binary — <code style="font-family: var(--font-mono);">go install ./cmd/vah</code> globally on $PATH (never committed into project repos).
+        License: Apache 2.0. Author: E.A.K.
+      </div>
+    </div>
+
   </div>
 </section>
 <!-- ═══════════════ SECTION 8: AGENTIC AI (ALIGNED EQUAL-HEIGHT CARDS) ═══════════════ -->
@@ -4017,290 +4303,6 @@ footer {
       </div>
     </div>
 
-    <!-- ═══ Vibe Architect Harness (vah) — Purple Detail Block ═══ -->
-    <div class="vah-box">
-      <div class="vah-head">
-        <span class="vah-badge">CI Gatekeeper</span>
-        <h4>Vibe Architect Harness (vah)</h4>
-      </div>
-
-      <p class="vah-tagline">
-        Active governance for AI coding agents. Deterministic. Auditable. Zero-dependency.
-      </p>
-
-      <p class="vah-lead">
-        <strong>Vibe Architect Harness (<code style="font-family: var(--font-mono); color: #6d28d9;">vah</code>)</strong>
-        is a single, zero-dependency Go binary that turns passive prompt governance into an active execution harness for AI coding agents.
-        When agents (Claude Code, Cursor, Aider, Roo, Codex) work on complex multi-file projects, <code style="font-family: var(--font-mono); color: #6d28d9;">vah</code>
-        is not the agent — it is the harness that makes those agents accountable, auditable, and production-ready inside the EIP-Labs pipeline.
-      </p>
-
-      <div class="vah-section-label">Critical Failures &amp; Deterministic Fixes</div>
-
-      <div class="vah-table-wrap">
-        <table class="vah-table">
-          <thead>
-            <tr>
-              <th>Problem</th>
-              <th>How vah Solves It</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Lost in the Middle — stuffing 10+ markdown files into context dilutes attention</td>
-              <td><strong>JIT Context Slicing</strong> — extracts only the exact tokens required for the current subtask (~80% less overhead)</td>
-            </tr>
-            <tr>
-              <td>Hallucinated State — agents invent diffs, omit files, misreport line numbers in CHANGES.md</td>
-              <td><strong>Git-Backed Ground Truth</strong> — reads <code style="font-family: var(--font-mono);">git status</code> and <code style="font-family: var(--font-mono);">git diff --numstat</code> to authoritatively maintain state</td>
-            </tr>
-            <tr>
-              <td>Passive Gating — agents declare "done" despite failing background tests</td>
-              <td><strong>Deterministic Gatekeeper</strong> — executes linters, tests, and security audits, captures exit codes, formats diagnostics for remediation loops</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="vah-section-label">5-Stage Verification Pipeline</div>
-
-      <div class="vah-pipeline-stages">
-        <div class="vah-stage-cell">
-          <strong>Format</strong>
-          <code>gofmt -l .</code>
-        </div>
-        <div class="vah-stage-cell">
-          <strong>Static Analysis</strong>
-          <code>golangci-lint run ./...</code>
-        </div>
-        <div class="vah-stage-cell">
-          <strong>Typecheck</strong>
-          <code>go vet ./...</code>
-        </div>
-        <div class="vah-stage-cell">
-          <strong>Tests</strong>
-          <code>go test -race -coverprofile=coverage.out ./...</code>
-        </div>
-        <div class="vah-stage-cell">
-          <strong>Security Audit</strong>
-          <code>govulncheck ./...</code>
-        </div>
-        <div class="vah-stage-cell">
-          <strong>Coverage</strong>
-          <code>go tool cover -func=coverage.out</code>
-        </div>
-      </div>
-
-      <div class="vah-note">
-        <strong>Gate behavior:</strong> each stage captures exit codes and output. If any stage fails, structured diagnostics are returned for AI agent remediation — never a soft warning.
-      </div>
-
-      <div class="vah-section-label">Core Workflow &amp; Natural Language Control Plane</div>
-
-      <div class="vah-grid-3">
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">01</span>
-            <h5>Core Commands</h5>
-          </header>
-          <p>Deterministic CLI surface used by humans and agents alike:</p>
-          <code class="vah-cmd">vah init</code>
-          <code class="vah-cmd">vah verify</code>
-          <code class="vah-cmd">vah sync</code>
-          <code class="vah-cmd">vah review</code>
-          <code class="vah-cmd">vah doctor</code>
-          <code class="vah-cmd">vah bench · vah docs · vah emergency override</code>
-        </article>
-
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">02</span>
-            <h5>Natural Language — vah do</h5>
-          </header>
-          <p>Pattern-matched intent routing with optional GenAI fallback and report synthesis:</p>
-          <code class="vah-cmd">vah do "verify the tests"</code>
-          <code class="vah-cmd">vah do "fix the security gate"</code>
-          <code class="vah-cmd">vah do "show me the planning context"</code>
-          <code class="vah-cmd">vah do "sync my changes"</code>
-          <code class="vah-cmd">vah do "review my workspace"</code>
-          <code class="vah-cmd">vah do "health check"</code>
-        </article>
-
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">03</span>
-            <h5>JIT Context &amp; Fix Gates</h5>
-          </header>
-          <p>Ephemeral, stateless prompt compiler — phase-aware, archetype-filtered, token-limited:</p>
-          <code class="vah-cmd">vah context --phase=[Plan]</code>
-          <code class="vah-cmd">vah context --phase=[Code]</code>
-          <code class="vah-cmd">vah context --phase=[Verify]</code>
-          <code class="vah-cmd">vah context fix --gate=security|error|performance|testing|audit|deploy|ci-cd|domain|schema</code>
-          <code class="vah-cmd">vah context gates</code>
-        </article>
-      </div>
-
-      <div class="vah-flow" style="margin-top: 1rem;">
-        <span class="vah-flow-step">User Input</span>
-        <span class="vah-flow-arrow">→</span>
-        <span class="vah-flow-step">Pattern Matching (fast, deterministic)</span>
-        <span class="vah-flow-arrow">→</span>
-        <span class="vah-flow-step">Intent Parsing</span>
-        <span class="vah-flow-arrow">→</span>
-        <span class="vah-flow-step">Command Execution</span>
-        <span class="vah-flow-arrow">→</span>
-        <span class="vah-flow-step">GenAI Report Synthesis (optional)</span>
-      </div>
-
-      <div class="vah-section-label">Use Cases in the EIP-Labs Pipeline</div>
-
-      <div class="vah-grid-2">
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">A</span>
-            <h5>Solo Developer with AI Agents</h5>
-          </header>
-          <p><code style="font-family: var(--font-mono); color: #6d28d9;">vah verify</code> runs after every change to catch lint violations, test failures, and security issues before they ship. <code style="font-family: var(--font-mono); color: #6d28d9;">vah sync</code> keeps CHANGES.md accurate without hallucination.</p>
-        </article>
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">B</span>
-            <h5>Team Governance Automation (CI Gatekeeper)</h5>
-          </header>
-          <p>Every PR goes through <code style="font-family: var(--font-mono); color: #6d28d9;">vah verify</code> — a deterministic 5-stage pipeline (format, lint, vet, tests, security audit) with structured diagnostics. No more "it works on my machine."</p>
-        </article>
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">C</span>
-            <h5>AI Agent Self-Correction Loop</h5>
-          </header>
-          <p>An agent runs <code style="font-family: var(--font-mono); color: #6d28d9;">vah do "verify the tests"</code>. On failure, raw compiler/linter output is translated into an actionable natural-language briefing the agent can remediate against.</p>
-        </article>
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">D</span>
-            <h5>ADRs, Debt &amp; Context-Aware Prompts</h5>
-          </header>
-          <ul>
-            <li><code style="font-family: var(--font-mono);">vah adr new "Use PostgreSQL" --decision=... --context=...</code> — DECISIONS.md auto-synced</li>
-            <li><code style="font-family: var(--font-mono);">vah debt scan</code> — TODO/FIXME/HACK/XXX with severity, synced to DEBT.md</li>
-            <li><code style="font-family: var(--font-mono);">vah context fix --gate=security</code> — ~200-token governance slice instead of dumping all of .governance/</li>
-          </ul>
-        </article>
-      </div>
-
-      <div class="vah-section-label">Architecture — Hexagonal (Ports &amp; Adapters)</div>
-
-      <div class="vah-grid-2">
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">⬡</span>
-            <h5>Layers</h5>
-          </header>
-          <ul>
-            <li><strong>cmd/vah/</strong> — CLI entry (Cobra commands)</li>
-            <li><strong>application/</strong> — ContextCompiler, GatekeeperService, NLPController, MemorySync, PlannerService, ReviewerService, DebtService, ADRService, E2EGate</li>
-            <li><strong>ports/</strong> — ConfigRepository, VCSClient, CommandRunner, GenAIClient</li>
-            <li><strong>adapters/</strong> — config env_parser, git client, process runner, //go:embed FS, genai (Ollama / Groq / OpenAI-compatible)</li>
-            <li><strong>domain/</strong> — ProjectConfig, FileDelta, VerificationReport, CommandIntent, ActionResult, LifecyclePhase — zero external deps</li>
-          </ul>
-        </article>
-        <article class="vah-card">
-          <header class="vah-card-head">
-            <span class="vah-num">§</span>
-            <h5>Embedded Governance Framework</h5>
-          </header>
-          <p>22-file, 7-category framework compiled into the binary via <code style="font-family: var(--font-mono); color: #6d28d9;">go:embed</code>. Overlay filesystem: local disk always wins — edit or drop new <code style="font-family: var(--font-mono);">.md</code> rules with no recompile:</p>
-          <ul>
-            <li><strong>1-core/</strong> — master protocol, manifest, context template, ADR standards</li>
-            <li><strong>2-domain/</strong> — ubiquitous language, system context, schemas, threat model</li>
-            <li><strong>3-standards/</strong> — clean code, security, error handling, observability, performance</li>
-            <li><strong>4-verification/</strong> — QA, testing, audit, benchmarks</li>
-            <li><strong>5-operations/</strong> — deploy, CI/CD, release, emergency, manual</li>
-            <li><strong>6-feedback/</strong> — refinement and debt tracking</li>
-            <li><strong>profiles/</strong> — language-specific profiles (Go)</li>
-          </ul>
-        </article>
-      </div>
-
-      <div class="vah-section-label">8 Foundational Rules</div>
-
-      <div class="vah-rules">
-        <div class="vah-rule">
-          <strong>01 · No Unchecked Code</strong>
-          <span>Must pass <code style="font-family: var(--font-mono);">make verify</code> before merge.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>02 · Domain First</strong>
-          <span>Adhere to the ubiquitous language in every symbol and commit.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>03 · Deterministic Memory</strong>
-          <span>Sync CONTEXT.md and CHANGES.md from real git state.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>04 · Zero Ignored Warnings</strong>
-          <span>No linter suppressions without an accepted ADR.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>05 · Zero-Trust Secrets</strong>
-          <span>No secrets in code; zero-trust security posture throughout.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>06 · Architectural Bound</strong>
-          <span>ADRs required for every structural shift.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>07 · Performance Budgets</strong>
-          <span>Latency and allocation constraints enforced in CI.</span>
-        </div>
-        <div class="vah-rule">
-          <strong>08 · Explicit Escalation</strong>
-          <span>Halt for human direction on ambiguity — never guess.</span>
-        </div>
-      </div>
-
-      <div class="vah-section-label">3-Phase Agent Lifecycle</div>
-
-      <div class="vah-lifecycle">
-        <span class="vah-phase">[Plan]</span>
-        <span class="vah-phase-arrow">→</span>
-        <span class="vah-phase">[Code]</span>
-        <span class="vah-phase-arrow">→</span>
-        <span class="vah-phase">[Verify]</span>
-        <span class="vah-phase-arrow">↻</span>
-        <span class="vah-phase escalation">[Escalation]</span>
-        <span class="vah-phase-arrow">→</span>
-        <span class="vah-phase">[Plan]</span>
-      </div>
-
-      <div class="vah-meta-row">
-        <div class="vah-meta">
-          <h5>Workspace State Files</h5>
-          <p><code style="font-family: var(--font-mono);">vah init</code> scaffolds config.env, .governance/, CONTEXT.md, CHANGES.md, DECISIONS.md, DEBT.md, BENCHMARK.md, DOCS.md.</p>
-        </div>
-        <div class="vah-meta">
-          <h5>Governance Tiers</h5>
-          <p>tier-1-mission-critical (all gates, strict) · tier-2-standard (default) · tier-3-prototype (minimal, relaxed).</p>
-        </div>
-        <div class="vah-meta">
-          <h5>Project Archetypes</h5>
-          <p>service · cli · library · worker · serverless — archetype filters which rules JIT context injects.</p>
-        </div>
-        <div class="vah-meta">
-          <h5>GenAI Providers</h5>
-          <p>Ollama (local, granite4.1:3b) · Groq (openai/gpt-oss-120b) · OpenAI-compatible — intent parsing + executive briefings.</p>
-        </div>
-      </div>
-
-      <div class="vah-note">
-        <strong>Emergency override:</strong> <code style="font-family: var(--font-mono);">vah emergency override ENG-123 --reason="..." --force-human-override</code>
-        bypasses all verification gates, is tracked in CHANGES.md, and requires reconciliation within 24 hours.
-        <br style="line-height: 1.8;" />
-        <strong>Install:</strong> single static binary — <code style="font-family: var(--font-mono);">go install ./cmd/vah</code> globally on $PATH (never committed into project repos).
-        License: Apache 2.0. Author: E.A.K.
-      </div>
-    </div>
   </div>
 </section>
 <!-- ═══════════════ SECTION 11: THE FLEXIBILITY MINDSET ═══════════════ -->
