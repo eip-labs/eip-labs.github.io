@@ -529,10 +529,10 @@ nav {
   line-height: 1.1;
   margin-bottom: 0.4rem;
   text-transform: uppercase;
-  background: linear-gradient(180deg, #00f0ff 0%, #0284c7 50%, #0c4a6e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 6px 20px rgba(0, 210, 224, 0.3));
+  color: var(--cyan-primary);
+  background: none;
+  -webkit-text-fill-color: var(--cyan-primary);
+  filter: drop-shadow(0 6px 20px rgba(0, 210, 224, 0.35));
 }
 
 .hero-subtitle {
@@ -2858,23 +2858,12 @@ footer {
 <!-- ═══════════════ SECTION 1: FULL-SCREEN HERO COMMAND CENTER ═══════════════ -->
 <section id="hero" class="hero-fullscreen">
   <div class="container hero-box">
-    <div class="sec-pill">
-      <span>&lt;/&gt;</span>
-      <span>THE APPLIED SYSTEMS RESEARCH &amp; RUNTIME PROVING GROUND</span>
-    </div>
-
     <h1 class="hero-logo-title">EIP-LABS</h1>
-    <div class="hero-subtitle">ENTERPRISE INTELLIGENCE PLATFORM</div>
-
-    <div class="hero-tagline">
-      Where First-Principles Mathematics, Aerospace Determinism, and Systems Engineering Converge.
-    </div>
+    <div class="hero-subtitle">ENTERPRISE <span style="color: var(--cyan-primary);">INTELLIGENCE</span> PLATFORM</div>
 
     <p class="hero-description">
-      <strong>Where everything begins.</strong> EIP-Labs is the foundational Systems Research and Development laboratory of EIP-Technologies. 
-      We engineer high-assurance AgentOS microkernels, distributed state fabrics, and autonomous runtime engines. 
-      Enterprise autonomy cannot survive on top of uncontrolled garbage collection spikes, dynamic typing errors, or fragile Python wrapper chains. 
-      We construct deterministic computational substrates in pure Go 1.25+, leveraging nanosecond zero-allocation memory IPC and defense-grade Linux kernel isolation.
+      EIP-Labs is a Research and Development laboratory of EIP-Technologies, focused on AI project development.
+      Every project is built from scratch in Golang, with performance, security, and flexibility in mind.
     </p>
   </div>
 </section>
