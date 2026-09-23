@@ -1,0 +1,4768 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EIP-Labs | Systems Research & Development Laboratory</title>
+<meta name="description" content="EIP-Labs is the foundational Systems Research & Development laboratory of EIP-Technologies. Engineering deterministic AgentOS microkernels, distributed state fabrics, and high-assurance runtime infrastructure in pure Go 1.25+.">
+
+<!-- Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM & THEME TOKENS
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg-base: #f8fdff;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #ebfbff 0%, #f6fcff 35%, #ffffff 100%);
+  --bg-surface: rgba(255, 255, 255, 0.94);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.98);
+  --bg-inset: rgba(240, 251, 255, 0.88);
+  --bg-card-glass: rgba(255, 255, 255, 0.84);
+
+  --cyan-primary: #00d2e0;
+  --cyan-bright: #00f0ff;
+  --cyan-deep: #0891b2;
+  --cyan-dark: #0e7490;
+  --cyan-ultradark: #155e75;
+  --cyan-glow: rgba(0, 210, 224, 0.35);
+  --cyan-glow-intense: rgba(0, 240, 255, 0.6);
+  --cyan-subtle: rgba(0, 210, 224, 0.08);
+  --cyan-border: rgba(8, 145, 178, 0.22);
+  --cyan-border-bright: rgba(0, 210, 224, 0.7);
+
+  --emerald-accent: #10b981;
+  --emerald-subtle: rgba(16, 185, 129, 0.08);
+  --emerald-border: rgba(16, 185, 129, 0.3);
+  --indigo-accent: #6366f1;
+  --purple-accent: #8b5cf6;
+  --amber-accent: #f59e0b;
+  --rose-accent: #f43f5e;
+
+  --text-primary: #0b1329;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-cyan: #0891b2;
+
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  line-height: 1.65;
+  background: var(--bg-gradient);
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--cyan-primary);
+  color: #ffffff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATED CANVAS & SCHEMATIC GRIDS
+   ═══════════════════════════════════════════════════════════════ */
+#schematic-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.blueprint-grid-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    linear-gradient(to right, rgba(8, 145, 178, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(8, 145, 178, 0.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ambient-aurora {
+  position: fixed;
+  top: -20%;
+  left: 10%;
+  width: 80vw;
+  height: 80vh;
+  background: radial-gradient(circle, rgba(0, 210, 224, 0.07) 0%, rgba(2, 132, 199, 0.035) 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(80px);
+  animation: floatAurora 18s ease-in-out infinite alternate;
+}
+
+@keyframes floatAurora {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(50px) scale(1.06); }
+  100% { transform: translateY(-25px) scale(0.96); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTAINERS & CONTROLLED TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════ */
+.container {
+  width: min(92%, 1320px);
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+section {
+  padding: 5.5rem 0;
+  position: relative;
+  z-index: 10;
+}
+
+.sec-header {
+  text-align: center;
+  margin-bottom: 3.2rem;
+}
+
+.sec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.32rem 1rem;
+  background: linear-gradient(135deg, rgba(0, 210, 224, 0.1) 0%, rgba(8, 145, 178, 0.07) 100%);
+  border: 1px solid var(--cyan-border);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cyan-dark);
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  margin-bottom: 0.9rem;
+  box-shadow: 0 2px 12px rgba(0, 210, 224, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.sec-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  line-height: 1.25;
+}
+
+.sec-desc {
+  font-size: 1.02rem;
+  color: var(--text-secondary);
+  max-width: 860px;
+  margin: 0 auto;
+  line-height: 1.75;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 1: NAVIGATION BAR
+   ═══════════════════════════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; width: 100%;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--cyan-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.8rem;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(8, 145, 178, 0.05);
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-icon-box {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, rgba(0, 210, 224, 0.16) 0%, rgba(8, 145, 178, 0.28) 100%);
+  border: 1.5px solid var(--cyan-primary);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+
+.brand-icon-box span {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--cyan-dark);
+}
+
+.brand-text {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 900;
+  letter-spacing: 1.6px;
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 50%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.nav-links-scroll {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  list-style: none;
+  overflow-x: auto;
+  max-width: 62vw;
+  padding: 0.35rem 0.5rem;
+}
+
+.nav-links-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-links-scroll a {
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.nav-links-scroll a:hover {
+  color: var(--cyan-deep);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-nav-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.48rem 1rem;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: linear-gradient(135deg, #00d2e0 0%, #0891b2 100%);
+  color: #ffffff;
+  border: 1px solid var(--cyan-primary);
+  box-shadow: 0 4px 12px var(--cyan-glow);
+  transition: all 0.25s var(--ease-spring);
+}
+
+.btn-nav-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 210, 224, 0.45);
+}
+
+.btn-nav-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.48rem 0.9rem;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: rgba(8, 145, 178, 0.07);
+  border: 1px solid var(--cyan-border);
+  color: var(--cyan-dark);
+  transition: all 0.2s ease;
+}
+
+.btn-nav-secondary:hover {
+  background: rgba(8, 145, 178, 0.14);
+  border-color: var(--cyan-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 2: FULL-SCREEN HERO COMMAND CENTER
+   ═══════════════════════════════════════════════════════════════ */
+.hero-fullscreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 6rem 1rem 3rem;
+}
+
+.hero-box {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.hero-logo-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.6vw, 3.8rem);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #00f0ff 0%, #0284c7 50%, #0c4a6e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 20px rgba(0, 210, 224, 0.3));
+}
+
+.hero-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.6vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: 1.4rem;
+}
+
+.hero-tagline {
+  font-size: clamp(1.1rem, 1.7vw, 1.3rem);
+  color: var(--cyan-dark);
+  font-weight: 700;
+  max-width: 860px;
+  margin: 0 auto 1.3rem;
+  line-height: 1.5;
+}
+
+.hero-description {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 840px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 3: MANIFESTO & CONSTELLATION SCHEMATIC
+   ═══════════════════════════════════════════════════════════════ */
+.manifesto-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 252, 255, 0.95) 100%);
+  border: 1px solid var(--cyan-border);
+  border-top: 4px solid var(--cyan-primary);
+  border-radius: 14px;
+  padding: 3.2rem;
+  box-shadow: 0 18px 45px rgba(8, 145, 178, 0.07);
+}
+
+.manifesto-layout {
+  display: grid;
+  grid-template-columns: 1.25fr 0.95fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.manifesto-copy h3 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1.1rem;
+  line-height: 1.3;
+}
+
+.manifesto-copy .imperative-lead {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cyan-dark);
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--cyan-subtle);
+  border-left: 3px solid var(--cyan-primary);
+  border-radius: 0 6px 6px 0;
+}
+
+.manifesto-copy p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.75;
+  margin-bottom: 1.1rem;
+}
+
+.constellation-wrapper {
+  background: rgba(245, 253, 255, 0.95);
+  border: 1.5px solid var(--cyan-border);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.3rem;
+  box-shadow: inset 0 0 20px rgba(0, 210, 224, 0.05);
+}
+
+.constellation-hub {
+  background: linear-gradient(135deg, #00d2e0 0%, #0284c7 100%);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 1.8px;
+  box-shadow: 0 0 20px var(--cyan-glow);
+  text-align: center;
+}
+
+.constellation-hub span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #e0f9fc;
+  letter-spacing: 1px;
+  margin-top: 3px;
+}
+
+.constellation-mesh {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.mesh-node {
+  background: #ffffff;
+  border: 1px solid var(--cyan-border);
+  border-radius: 7px;
+  padding: 0.8rem 0.4rem;
+  text-align: center;
+  transition: all 0.25s var(--ease-spring);
+  box-shadow: 0 3px 10px rgba(8, 145, 178, 0.04);
+}
+
+.mesh-node:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 4px 16px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+.mesh-node-code {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--cyan-deep);
+}
+
+.mesh-node-desc {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 4: 5 PILLARS (CONTINUOUS OPEN FLOW)
+   ═══════════════════════════════════════════════════════════════ */
+.pillar-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.pillar-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-left: 4px solid var(--cyan-primary);
+  border-radius: 11px;
+  padding: 2rem 2.2rem;
+  box-shadow: 0 6px 25px rgba(8, 145, 178, 0.04);
+  transition: all 0.3s var(--ease-spring);
+}
+
+.pillar-card:hover {
+  transform: translateX(5px);
+  border-color: var(--cyan-primary);
+  box-shadow: 0 10px 30px rgba(0, 210, 224, 0.1);
+}
+
+.pillar-top-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.7rem;
+}
+
+.pillar-title {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.7rem;
+}
+
+.pillar-content-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1.8rem;
+  align-items: start;
+}
+
+.pillar-body p {
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.75;
+  margin-bottom: 0.9rem;
+}
+
+.pillar-deliverables-box {
+  background: var(--bg-inset);
+  border: 1px solid rgba(8, 145, 178, 0.16);
+  border-radius: 7px;
+  padding: 1.1rem;
+}
+
+.pillar-deliverables-box h5 {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--cyan-dark);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.45rem;
+}
+
+.pillar-deliverables-box ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pillar-deliverables-box li {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pillar-deliverables-box li::before {
+  content: '▸';
+  color: var(--cyan-primary);
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 5: APPLIED RESEARCH & RESEARCH ENGINEERING
+   ═══════════════════════════════════════════════════════════════ */
+.research-grid-dual {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 2.2rem;
+}
+
+.research-card-formal {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 12px;
+  padding: 2.2rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+}
+
+.research-card-formal h4 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.9rem;
+}
+
+.research-step-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 1.2rem;
+}
+
+.re-step-item {
+  background: var(--bg-inset);
+  border-left: 3px solid var(--cyan-primary);
+  border-radius: 0 6px 6px 0;
+  padding: 0.8rem 1rem;
+}
+
+.re-step-item strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--cyan-deep);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.re-step-item p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 6: PRODUCT MANAGEMENT LIFE CYCLE (PMLC)
+   ═══════════════════════════════════════════════════════════════ */
+.pmlc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.6rem;
+}
+
+.pmlc-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 11px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+  transition: all 0.25s var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.pmlc-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--cyan-primary), #0284c7);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.pmlc-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--cyan-primary);
+  box-shadow: 0 10px 25px rgba(0, 210, 224, 0.1);
+}
+
+.pmlc-card:hover::before {
+  opacity: 1;
+}
+
+.pmlc-step {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cyan-deep);
+  background: var(--cyan-subtle);
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 0.7rem;
+}
+
+.pmlc-title {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.pmlc-desc {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 7: AI SOFTWARE ARCHITECTING
+   ═══════════════════════════════════════════════════════════════ */
+.arch-layer-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 12px;
+  padding: 2.4rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+  margin-bottom: 1.8rem;
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.arch-layer-box:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 10px 32px var(--cyan-glow),
+              0 0 0 1px var(--cyan-border-bright);
+  transform: translateY(-3px);
+}
+
+.arch-layer-head {
+  margin-bottom: 1rem;
+}
+
+.arch-layer-head h4 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-top: 0.55rem;
+}
+
+.arch-layer-lead {
+  color: var(--text-secondary);
+  font-size: 0.97rem;
+  line-height: 1.75;
+  margin-bottom: 1.6rem;
+}
+
+.arch-layer-footnote {
+  margin-top: 1.4rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--cyan-subtle);
+  border-left: 3px solid var(--cyan-primary);
+  border-radius: 0 6px 6px 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cyan-dark);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+}
+
+.arch-principles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.2rem;
+}
+
+.arch-principle-cell {
+  background: var(--bg-inset);
+  border: 1px solid rgba(8, 145, 178, 0.15);
+  border-radius: 9px;
+  padding: 1.3rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.arch-principle-cell:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 4px 16px var(--cyan-glow);
+}
+
+.arch-principle-cell h5 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.45rem;
+}
+
+.arch-principle-cell p {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.adr-structure-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+
+@media (max-width: 900px) {
+  .adr-structure-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .adr-structure-grid { grid-template-columns: 1fr; }
+}
+
+.adr-structure-cell {
+  background: #ffffff;
+  border: 1px solid var(--cyan-border);
+  border-top: 3px solid var(--cyan-primary);
+  border-radius: 9px;
+  padding: 1.3rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s var(--ease-spring);
+}
+
+.adr-structure-cell:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 6px 20px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+.adr-field-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--cyan-deep);
+  background: var(--cyan-subtle);
+  border: 1px solid var(--cyan-border);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.8px;
+  margin-bottom: 0.55rem;
+}
+
+.adr-structure-cell h5 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.adr-structure-cell p {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 8: VIBE ARCHITECTING VS CODING/ENGINEERING
+   ═══════════════════════════════════════════════════════════════ */
+.triad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+}
+
+.triad-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 11px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+}
+
+.triad-card.highlight {
+  border-color: var(--cyan-primary);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 252, 255, 0.95) 100%);
+  box-shadow: 0 10px 30px rgba(0, 210, 224, 0.12);
+}
+
+.triad-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.triad-card p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.testing-pipeline-box {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--cyan-border);
+  border-radius: 12px;
+  padding: 2.2rem;
+  box-shadow: 0 8px 25px rgba(8, 145, 178, 0.05);
+}
+
+.testing-pipeline-box h4 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.8rem;
+}
+
+.tools-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.tool-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--cyan-subtle);
+  border: 1px solid var(--cyan-border);
+  color: var(--cyan-dark);
+}
+
+.verify-intro {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.verify-strip {
+  margin-top: 1.2rem;
+  padding: 1rem 1.1rem;
+  background: var(--cyan-subtle);
+  border: 1px dashed var(--cyan-border);
+  border-radius: 8px;
+}
+
+.verify-strip-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--cyan-dark);
+}
+
+.verify-strip .tools-tag-row {
+  margin-top: 0.6rem;
+}
+
+.verify-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--cyan-deep);
+  margin: 1.8rem 0 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verify-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan-border), transparent);
+}
+
+.verify-grid,
+.verify-policies {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.1rem;
+}
+
+.verify-card,
+.verify-policy {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-top: 3px solid var(--cyan-primary);
+  border-radius: 10px;
+  padding: 1.3rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.verify-card:hover,
+.verify-policy:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 8px 24px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+.verify-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.verify-num {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--cyan-primary), #0284c7);
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.verify-card-head h5 {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.verify-item + .verify-item {
+  border-top: 1px solid rgba(8, 145, 178, 0.12);
+  padding-top: 0.85rem;
+}
+
+.verify-item-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.verify-item-id {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cyan-dark);
+  background: var(--cyan-subtle);
+  border: 1px solid var(--cyan-border);
+  padding: 1px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.verify-item-head strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.verify-badge {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.verify-badge.optional {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.verify-badge.enforced {
+  color: var(--cyan-dark);
+  background: var(--cyan-subtle);
+  border: 1px solid var(--cyan-border);
+}
+
+.verify-item p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.verify-item ul {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.verify-item ul li,
+.verify-policy ul li {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.verify-item ul li::before,
+.verify-policy ul li::before {
+  content: '▸ ';
+  color: var(--cyan-primary);
+  font-weight: bold;
+}
+
+.verify-item ul ul {
+  margin-top: 0.3rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--cyan-border);
+}
+
+.verify-item ul ul li::before {
+  content: '› ';
+  color: var(--cyan-deep);
+}
+
+.verify-cmd {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--cyan-ultradark);
+  background: rgba(8, 145, 178, 0.08);
+  border: 1px solid var(--cyan-border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-top: 0.4rem;
+}
+
+.verify-note {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  background: rgba(245, 158, 11, 0.07);
+  border-left: 3px solid var(--amber-accent);
+  border-radius: 0 5px 5px 0;
+  padding: 0.5rem 0.7rem;
+  margin-top: 0.45rem;
+}
+
+.verify-note.info {
+  background: var(--cyan-subtle);
+  border-left-color: var(--cyan-primary);
+}
+
+.verify-note.danger {
+  background: rgba(244, 63, 94, 0.07);
+  border-left-color: var(--rose-accent);
+}
+
+.verify-policy p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.verify-policy ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.verify-policy ul li strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .verify-grid,
+  .verify-policies { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .verify-grid,
+  .verify-policies { grid-template-columns: 1fr; }
+  .verify-badge { margin-left: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 9: AGENTIC AI (ALIGNED EQUAL-HEIGHT CARDS)
+   ═══════════════════════════════════════════════════════════════ */
+.agentic-uniform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.6rem;
+}
+
+.agentic-card-uniform {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-top: 3.5px solid var(--cyan-primary);
+  border-radius: 11px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.agentic-card-uniform.span-full {
+  grid-column: 1 / -1;
+}
+
+.agentic-card-uniform h4 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agentic-card-uniform p {
+  font-size: 0.94rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.agentic-list-uniform {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+
+.agentic-list-uniform li::before {
+  content: '▸ ';
+  color: var(--cyan-primary);
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 10: STANDARD SDLC PHASES
+   ═══════════════════════════════════════════════════════════════ */
+.sdlc-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  position: relative;
+}
+
+.sdlc-flow::before {
+  content: '';
+  position: absolute;
+  top: 15px; bottom: 15px; left: 22px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--cyan-primary) 0%, #0284c7 50%, var(--emerald-accent) 100%);
+}
+
+.sdlc-row {
+  position: relative;
+  margin-left: 60px;
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 10px;
+  padding: 1.6rem 2rem;
+  box-shadow: 0 4px 18px rgba(8, 145, 178, 0.04);
+  transition: all 0.25s var(--ease-spring);
+}
+
+.sdlc-row:hover {
+  transform: translateX(5px);
+  border-color: var(--cyan-primary);
+  box-shadow: 0 8px 24px rgba(0, 210, 224, 0.1);
+}
+
+.sdlc-dot {
+  position: absolute;
+  left: -60px;
+  top: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 2px solid var(--cyan-primary);
+  box-shadow: 0 0 12px var(--cyan-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--cyan-deep);
+  z-index: 2;
+}
+
+.sdlc-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.sdlc-row-title {
+  font-family: var(--font-display);
+  font-size: 1.16rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.sdlc-row-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.sdlc-specs-inline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem;
+  background: var(--bg-inset);
+  border: 1px solid rgba(8, 145, 178, 0.15);
+  border-radius: 7px;
+  padding: 0.9rem;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.sdlc-specs-inline strong {
+  color: var(--cyan-dark);
+  font-family: var(--font-mono);
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 11: CI/CD PIPELINES
+   ═══════════════════════════════════════════════════════════════ */
+.cicd-principles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+}
+
+.cicd-principle {
+  background: var(--bg-inset);
+  border: 1px solid rgba(8, 145, 178, 0.16);
+  border-radius: 9px;
+  padding: 1.1rem 1.2rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cicd-principle:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 4px 16px var(--cyan-glow);
+}
+
+.cicd-principle h5 {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.cicd-principle p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.cicd-rail {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 1.4rem;
+  padding: 0.85rem 1rem;
+  background: var(--cyan-subtle);
+  border: 1px dashed var(--cyan-border);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.cicd-rail-node {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.cicd-rail-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--cyan-primary), #0284c7);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px var(--cyan-glow);
+  flex-shrink: 0;
+}
+
+.cicd-rail-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--cyan-dark);
+  white-space: nowrap;
+}
+
+.cicd-rail-arrow {
+  flex: 1;
+  min-width: 28px;
+  height: 2px;
+  margin: 0 0.55rem;
+  background: linear-gradient(90deg, var(--cyan-primary), rgba(8, 145, 178, 0.2));
+  position: relative;
+}
+
+.cicd-rail-arrow::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 6px solid var(--cyan-deep);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.cicd-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.1rem;
+}
+
+.cicd-stage {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-top: 3px solid var(--cyan-primary);
+  border-radius: 10px;
+  padding: 1.3rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.cicd-stage:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 8px 24px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+.cicd-stage-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.cicd-stage-num {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--cyan-primary), #0284c7);
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.cicd-stage-head h5 {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.cicd-stage p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cicd-stage .tools-tag-row {
+  margin-top: 0;
+}
+
+.cicd-gate {
+  margin-top: auto;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(8, 145, 178, 0.12);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.cicd-gate strong {
+  display: block;
+  color: var(--cyan-dark);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.cicd-env-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.cicd-env {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--cyan-border);
+  border-radius: 9px;
+  padding: 1rem 1.15rem;
+}
+
+.cicd-env h5 {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan-dark);
+  margin-bottom: 0.35rem;
+}
+
+.cicd-env p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.vah-box {
+  margin-top: 1.8rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 245, 255, 0.96) 100%);
+  border: 1.5px solid rgba(139, 92, 246, 0.35);
+  border-top: 4px solid var(--purple-accent);
+  border-radius: 14px;
+  padding: 2.4rem;
+  box-shadow: 0 14px 40px rgba(139, 92, 246, 0.1);
+}
+
+.vah-box:hover {
+  border-color: var(--purple-accent);
+  box-shadow: 0 16px 44px rgba(139, 92, 246, 0.16);
+}
+
+.vah-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.vah-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, var(--purple-accent), #6d28d9);
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.35);
+}
+
+.vah-head h4 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #5b21b6;
+  margin: 0;
+}
+
+.vah-tagline {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #7c3aed;
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.vah-lead {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin-bottom: 1.3rem;
+}
+
+.vah-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #7c3aed;
+  margin: 1.6rem 0 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.vah-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.4), transparent);
+}
+
+.vah-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 9px;
+}
+
+.vah-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  min-width: 560px;
+}
+
+.vah-table th {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  text-align: left;
+  color: #fff;
+  background: linear-gradient(135deg, var(--purple-accent), #6d28d9);
+  padding: 0.65rem 0.9rem;
+}
+
+.vah-table td {
+  padding: 0.7rem 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  vertical-align: top;
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.vah-table tr:nth-child(even) td {
+  background: rgba(139, 92, 246, 0.04);
+}
+
+.vah-table td:first-child {
+  font-weight: 700;
+  color: #5b21b6;
+}
+
+.vah-grid-3,
+.vah-grid-2 {
+  display: grid;
+  gap: 1rem;
+}
+
+.vah-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.vah-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+.vah-card {
+  background: #ffffff;
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  border-top: 3px solid var(--purple-accent);
+  border-radius: 10px;
+  padding: 1.2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.vah-card:hover {
+  border-color: var(--purple-accent);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.16);
+  transform: translateY(-2px);
+}
+
+.vah-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.vah-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--purple-accent), #6d28d9);
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.vah-card-head h5 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #5b21b6;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.vah-card p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.vah-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.vah-card ul li {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.vah-card ul li::before {
+  content: '▸ ';
+  color: var(--purple-accent);
+  font-weight: bold;
+}
+
+.vah-cmd {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5b21b6;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  border-radius: 5px;
+  padding: 0.45rem 0.65rem;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.vah-cmd + .vah-cmd { margin-top: 0.35rem; }
+
+.vah-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.15rem;
+  padding: 0.9rem 1rem;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px dashed rgba(139, 92, 246, 0.35);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #5b21b6;
+  line-height: 1.6;
+}
+
+.vah-flow-step {
+  background: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 5px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.vah-flow-arrow {
+  color: var(--purple-accent);
+  font-weight: 700;
+  padding: 0 0.2rem;
+}
+
+.vah-rules {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.7rem;
+}
+
+.vah-rule {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 7px;
+  padding: 0.75rem 0.85rem;
+}
+
+.vah-rule strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6d28d9;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.vah-rule span {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.vah-lifecycle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(109, 40, 217, 0.06));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 9px;
+  margin-top: 0.8rem;
+}
+
+.vah-phase {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--purple-accent), #6d28d9);
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+}
+
+.vah-phase.escalation {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.vah-phase-arrow {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.vah-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  background: rgba(139, 92, 246, 0.07);
+  border-left: 3px solid var(--purple-accent);
+  border-radius: 0 6px 6px 0;
+  padding: 0.6rem 0.8rem;
+  margin-top: 1rem;
+}
+
+.vah-note strong { color: #5b21b6; }
+
+.vah-pipeline-stages {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.55rem;
+}
+
+.vah-stage-cell {
+  background: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+  padding: 0.7rem 0.55rem;
+  text-align: center;
+}
+
+.vah-stage-cell strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.3rem;
+}
+
+.vah-stage-cell code {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.vah-meta-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.vah-meta {
+  background: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 8px;
+  padding: 0.85rem 0.95rem;
+}
+
+.vah-meta h5 {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #7c3aed;
+  margin-bottom: 0.35rem;
+}
+
+.vah-meta p {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .vah-grid-3 { grid-template-columns: 1fr; }
+  .vah-rules { grid-template-columns: repeat(2, 1fr); }
+  .vah-pipeline-stages { grid-template-columns: repeat(3, 1fr); }
+  .vah-meta-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .vah-box { padding: 1.5rem; }
+  .vah-grid-2 { grid-template-columns: 1fr; }
+  .vah-rules { grid-template-columns: 1fr; }
+  .vah-pipeline-stages { grid-template-columns: 1fr 1fr; }
+  .vah-meta-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1100px) {
+  .cicd-principles { grid-template-columns: repeat(2, 1fr); }
+  .cicd-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .cicd-principles,
+  .cicd-grid,
+  .cicd-env-strip { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 12: FLEXIBILITY MINDSET & SWAPPABLE THREADS
+   ═══════════════════════════════════════════════════════════════ */
+.flex-environments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+}
+
+.env-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 11px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+}
+
+.env-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cyan-deep);
+  background: var(--cyan-subtle);
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 0.7rem;
+}
+
+.env-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.env-card p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.swappable-threads-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 251, 255, 0.95) 100%);
+  border: 1.5px solid var(--cyan-primary);
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 35px rgba(0, 210, 224, 0.08);
+}
+
+.swappable-threads-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.7rem;
+}
+
+.thread-quad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1.4rem;
+}
+
+.thread-quad-item {
+  background: #ffffff;
+  border: 1px solid var(--cyan-border);
+  border-radius: 7px;
+  padding: 1.1rem;
+}
+
+.thread-quad-item strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--cyan-deep);
+  margin-bottom: 3px;
+}
+
+.thread-quad-item p {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 13: ENTERPRISE SECURITY & ISO STANDARDS
+   ═══════════════════════════════════════════════════════════════ */
+.security-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.6rem;
+}
+
+.security-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 11px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+}
+
+.security-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 7px;
+  background: var(--cyan-subtle);
+  border: 1px solid var(--cyan-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cyan-deep);
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.security-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.security-card p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 14: ENTERPRISE SOFTWARE DEVELOPMENT REQUIREMENTS
+   ═══════════════════════════════════════════════════════════════ */
+.reqs-quad-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.6rem;
+}
+
+.reqs-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 11px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+}
+
+.reqs-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+  border-bottom: 1.5px solid rgba(8, 145, 178, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.reqs-card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 0.9rem;
+}
+
+.reqs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.reqs-list li::before {
+  content: '✓ ';
+  color: var(--emerald-accent);
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 15: THE 7 SOVEREIGN ENGINES
+   ═══════════════════════════════════════════════════════════════ */
+.engine-flagship {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 251, 255, 0.95) 100%);
+  border: 1.5px solid var(--cyan-primary);
+  border-top: 4px solid var(--cyan-primary);
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 14px 40px rgba(0, 210, 224, 0.1);
+  margin-bottom: 1.8rem;
+}
+
+.engine-flagship-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.6rem;
+}
+
+.engine-flagship-title {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.engine-flagship-sub {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--cyan-deep);
+  margin-bottom: 0.9rem;
+}
+
+.engine-flagship-desc {
+  font-size: 0.98rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin-bottom: 1.2rem;
+}
+
+.engine-satellites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 1.6rem;
+}
+
+.satellite-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-top: 3px solid var(--cyan-primary);
+  border-radius: 11px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sat-code {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-top: 0.3rem;
+}
+
+.sat-sub {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--cyan-deep);
+  margin-bottom: 0.7rem;
+}
+
+.sat-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 1.1rem;
+}
+
+.sat-specs-box {
+  background: var(--bg-inset);
+  border: 1px solid rgba(8, 145, 178, 0.15);
+  border-radius: 6px;
+  padding: 0.85rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 16: OPEN-CODE TRANSPARENCY & BSL 1.1
+   ═══════════════════════════════════════════════════════════════ */
+.license-card-box {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 251, 255, 0.95) 100%);
+  border: 1px solid var(--cyan-border);
+  border-radius: 12px;
+  padding: 2.8rem;
+  box-shadow: 0 10px 30px rgba(8, 145, 178, 0.05);
+}
+
+.license-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.2rem;
+  margin-top: 1.6rem;
+}
+
+.license-col h4 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-bottom: 0.7rem;
+}
+
+.license-col p {
+  font-size: 0.94rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 17: ACADEMIC & SCIENTIFIC COLLABORATION
+   ═══════════════════════════════════════════════════════════════ */
+.collab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.6rem;
+}
+
+.collab-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 11px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
+}
+
+.collab-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.collab-card p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 18: COMMERCIAL COLLABORATION & ENTERPRISE PARTNERSHIPS
+   ═══════════════════════════════════════════════════════════════ */
+.commercial-card-box {
+  background: var(--bg-surface-elevated);
+  border: 1.5px solid var(--cyan-primary);
+  border-radius: 14px;
+  padding: 3rem;
+  box-shadow: 0 14px 40px rgba(0, 210, 224, 0.08);
+}
+
+.commercial-routing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem;
+  margin-top: 2rem;
+}
+
+.routing-tile {
+  background: var(--bg-inset);
+  border: 1px solid var(--cyan-border);
+  border-radius: 10px;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.routing-tile h5 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.routing-tile p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+}
+
+.routing-mail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--cyan-deep);
+  text-decoration: none;
+  border-bottom: 1.5px dashed var(--cyan-deep);
+  padding-bottom: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 19: ADVISORY DESK
+   ═══════════════════════════════════════════════════════════════ */
+.advisory-box {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 251, 255, 0.95) 100%);
+  border: 1.5px solid var(--cyan-primary);
+  border-radius: 14px;
+  padding: 3rem;
+  box-shadow: 0 14px 40px rgba(0, 210, 224, 0.09);
+  text-align: center;
+}
+
+.advisory-box h3 {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.8rem;
+}
+
+.advisory-box p {
+  font-size: 1.02rem;
+  color: var(--text-secondary);
+  max-width: 800px;
+  margin: 0 auto 1.8rem;
+  line-height: 1.75;
+}
+
+.advisory-models-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.4rem;
+  margin-bottom: 2.2rem;
+  text-align: left;
+}
+
+.advisory-model-cell {
+  background: #ffffff;
+  border: 1px solid var(--cyan-border);
+  border-radius: 8px;
+  padding: 1.3rem;
+}
+
+.advisory-model-cell h5 {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  color: var(--cyan-deep);
+  margin-bottom: 3px;
+}
+
+.advisory-model-cell p {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 0;
+}
+
+.dual-contact-triggers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.advisory-email-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.8rem 1.8rem;
+  background: linear-gradient(135deg, #00d2e0 0%, #0284c7 100%);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 7px;
+  border: 1px solid var(--cyan-primary);
+  box-shadow: 0 4px 16px var(--cyan-glow);
+  transition: all 0.25s var(--ease-spring);
+}
+
+.advisory-email-trigger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 210, 224, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 20: ENTERPRISE FOOTER
+   ═══════════════════════════════════════════════════════════════ */
+footer {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid var(--cyan-border);
+  padding: 4rem 0 2.2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 2.8rem;
+  margin-bottom: 3rem;
+}
+
+.footer-brand-p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.9rem;
+  line-height: 1.7;
+  max-width: 360px;
+}
+
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 1.1rem;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.footer-links a {
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: var(--cyan-deep);
+  padding-left: 3px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(8, 145, 178, 0.15);
+  padding-top: 1.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UNIFIED CYAN HOVER — WHITE CARDS
+   ═══════════════════════════════════════════════════════════════ */
+.manifesto-card,
+.research-card-formal,
+.triad-card,
+.testing-pipeline-box,
+.agentic-card-uniform,
+.env-card,
+.swappable-threads-card,
+.security-card,
+.reqs-card,
+.satellite-card,
+.license-card-box,
+.collab-card,
+.commercial-card-box,
+.routing-tile,
+.advisory-box,
+.advisory-model-cell,
+.thread-quad-item {
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.manifesto-card:hover,
+.research-card-formal:hover,
+.triad-card:hover,
+.testing-pipeline-box:hover,
+.agentic-card-uniform:hover,
+.env-card:hover,
+.swappable-threads-card:hover,
+.security-card:hover,
+.reqs-card:hover,
+.satellite-card:hover,
+.license-card-box:hover,
+.collab-card:hover,
+.commercial-card-box:hover,
+.routing-tile:hover,
+.advisory-box:hover,
+.advisory-model-cell:hover,
+.thread-quad-item:hover {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 10px 32px var(--cyan-glow),
+              0 0 0 1px var(--cyan-border-bright),
+              inset 0 0 24px rgba(0, 210, 224, 0.04);
+  transform: translateY(-3px);
+}
+
+@media (max-width: 1024px) {
+  nav { padding: 0 1rem; }
+  .nav-links-scroll { display: none; }
+  .manifesto-layout { grid-template-columns: 1fr; }
+  .pillar-content-grid { grid-template-columns: 1fr; }
+  .research-grid-dual { grid-template-columns: 1fr; }
+  .license-layout-grid { grid-template-columns: 1fr; }
+  .commercial-routing-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .agentic-uniform-grid { grid-template-columns: 1fr; }
+  .sdlc-flow::before { left: 16px; }
+  .sdlc-row { margin-left: 46px; padding: 1.4rem; }
+  .sdlc-dot { left: -46px; width: 34px; height: 34px; font-size: 0.8rem; }
+}
+
+@media (max-width: 640px) {
+  .footer-top { grid-template-columns: 1fr; }
+  .dual-contact-triggers { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Dynamic Interactive Canvas & Grid Overlay -->
+<canvas id="schematic-canvas"></canvas>
+<div class="blueprint-grid-overlay"></div>
+<div class="ambient-aurora"></div>
+
+<!-- ═══════════════ SECTION 1: NAVIGATION BAR ═══════════════ -->
+<nav id="nav">
+  <a href="#hero" class="brand-group">
+    <div class="brand-icon-box">
+      <span>&lt;/&gt;</span>
+    </div>
+    <div>
+      <div class="brand-text">EIP-LABS</div>
+      <div class="brand-sub">SYSTEMS RESEARCH &amp; DEVELOPMENT LABORATORY</div>
+    </div>
+  </a>
+
+  <!-- Complete Course Navigation Stream -->
+  <ul class="nav-links-scroll">
+    <li><a href="#manifesto">Manifesto</a></li>
+    <li><a href="#disciplines">5 Pillars</a></li>
+    <li><a href="#research-lifecycle">Research</a></li>
+    <li><a href="#pmlc">PMLC</a></li>
+    <li><a href="#ai-architecture-adrs">AI Architecting</a></li>
+    <li><a href="#vibe-architecting">Vibe Architecting</a></li>
+    <li><a href="#agentic-ai-dev">Agentic AI</a></li>
+    <li><a href="#sdlc">SDLC</a></li>
+    <li><a href="#cicd-pipelines">CI/CD</a></li>
+    <li><a href="#flexibility-mindset">Flexibility</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#enterprise-standards">Standards</a></li>
+    <li><a href="#engines">7 Engines</a></li>
+    <li><a href="#open-code-licensing">Licensing</a></li>
+    <li><a href="#academic-collaboration">Academia</a></li>
+    <li><a href="#commercial-collaboration">Commercial</a></li>
+    <li><a href="#lab-rd">Lab R&amp;D</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <a href="https://github.com/eip-labs" target="_blank" rel="noopener noreferrer" class="btn-nav-secondary">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <a href="https://www.linkedin.com/company/eip-labs" target="_blank" rel="noopener noreferrer" class="btn-nav-primary">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+  </div>
+</nav>
+
+
+<!-- ═══════════════ SECTION 1: FULL-SCREEN HERO COMMAND CENTER ═══════════════ -->
+<section id="hero" class="hero-fullscreen">
+  <div class="container hero-box">
+    <div class="sec-pill">
+      <span>&lt;/&gt;</span>
+      <span>THE APPLIED SYSTEMS RESEARCH &amp; RUNTIME PROVING GROUND</span>
+    </div>
+
+    <h1 class="hero-logo-title">EIP-LABS</h1>
+    <div class="hero-subtitle">ENTERPRISE INTELLIGENCE PLATFORM</div>
+
+    <div class="hero-tagline">
+      Where First-Principles Mathematics, Aerospace Determinism, and Systems Engineering Converge.
+    </div>
+
+    <p class="hero-description">
+      <strong>Where everything begins.</strong> EIP-Labs is the foundational Systems Research and Development laboratory of EIP-Technologies. 
+      We engineer high-assurance AgentOS microkernels, distributed state fabrics, and autonomous runtime engines. 
+      Enterprise autonomy cannot survive on top of uncontrolled garbage collection spikes, dynamic typing errors, or fragile Python wrapper chains. 
+      We construct deterministic computational substrates in pure Go 1.25+, leveraging nanosecond zero-allocation memory IPC and defense-grade Linux kernel isolation.
+    </p>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 2: THE LABORATORY MANIFESTO ═══════════════ -->
+<section id="manifesto">
+  <div class="container">
+    <div class="manifesto-card">
+      <div class="manifesto-layout">
+        <div class="manifesto-copy">
+          <div class="sec-pill">&lt;/&gt; FIRST-PRINCIPLES IMPERATIVE</div>
+          <p class="imperative-lead">
+            EIP-Labs uses the best practices from decades of software engineering in research and production, with proprietary innovations where past engineering falls short.
+          </p>
+          <h3>Autonomy Built From Line Zero</h3>
+          <p>
+            In mission-critical enterprise computing, high-assurance autonomy cannot be achieved by stitching together third-party Python wrappers, uncontrolled garbage collectors, and unmanaged open-source scripts. An autonomous agent is not a conversational novelty; it is an active state machine executing real-time financial settlements, commanding industrial telemetry, and mutating sovereign corporate databases.
+          </p>
+          <p>
+            <strong>EIP-Labs exists to construct the native foundation from line zero.</strong> We operate as the experimental incubator for EIP-Technologies. Principles of operating system microkernel design, aerospace avionics determinism, and high-frequency trading concurrency converge here to forge the native substrate for autonomous intelligence.
+          </p>
+          <p>
+            Before any system reaches enterprise deployment at EIP-Technologies, it is formally modeled, subjected to adversarial chaos harness suites, and compiled into production-grade artifacts right here.
+          </p>
+        </div>
+
+        <!-- Architectural Constellation Schematic -->
+        <div class="constellation-wrapper">
+          <div class="constellation-hub">
+            ENTERPRISE AGENTIC ENGINE
+            <span>FLAGSHIP AGENTOS RUNTIME</span>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--cyan-dark); letter-spacing: 1.2px; font-weight: 700;">
+            // 6 MODULAR SATELLITE ENGINES //
+          </div>
+          <div class="constellation-mesh">
+            <div class="mesh-node">
+              <div class="mesh-node-code">EBE</div>
+              <div class="mesh-node-desc">Blockchain</div>
+            </div>
+            <div class="mesh-node">
+              <div class="mesh-node-code">ESE</div>
+              <div class="mesh-node-desc">Script VM</div>
+            </div>
+            <div class="mesh-node">
+              <div class="mesh-node-code">EKE</div>
+              <div class="mesh-node-desc">Knowledge</div>
+            </div>
+            <div class="mesh-node">
+              <div class="mesh-node-code">EME</div>
+              <div class="mesh-node-desc">Memory</div>
+            </div>
+            <div class="mesh-node">
+              <div class="mesh-node-code">ETE</div>
+              <div class="mesh-node-desc">Tool Broker</div>
+            </div>
+            <div class="mesh-node">
+              <div class="mesh-node-code">EGE</div>
+              <div class="mesh-node-desc">eBPF Gate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 3: THE 5 ENGINEERING PILLARS ═══════════════ -->
+<section id="disciplines">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; INTEGRATED CAPABILITIES</div>
+      <h2 class="sec-title">The Five Disciplines of EIP-Labs</h2>
+      <p class="sec-desc">
+        Complete laboratory mastery spanning theoretical research, low-level systems engineering, microkernel design, open-core product stewardship, and sovereign enterprise deployment.
+      </p>
+    </div>
+
+    <div class="pillar-stream">
+      
+      <!-- Pillar 1 -->
+      <div class="pillar-card">
+        <div class="pillar-top-meta">
+          <span class="sec-pill" style="margin-bottom: 0;">DISCIPLINE 01 // FORMAL INVARIANTS</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan-deep); font-weight: 700;">MATHEMATICAL FOUNDATION</span>
+        </div>
+        <h3 class="pillar-title">Applied Systems Research &amp; AI Mathematical Theory</h3>
+        <div class="pillar-content-grid">
+          <div class="pillar-body">
+            <p>
+              EIP-Labs researches foundational computational models for autonomous intelligence. We reject probabilistic guesswork in favor of formal invariants: convergence proofs in multi-agent consensus, bounded streaming dynamics under backpressure, and geometric vector-graph topologies.
+            </p>
+            <p>
+              Our research team translates complex distributed systems theory—including Raft/Paxos quorum safety, Partially Observable Markov Decision Processes (POMDP), TLA+ temporal logic specifications, and Bellman-optimality in real-time planning—into compact, highly-parallel Go runtime specifications.
+            </p>
+          </div>
+          <div class="pillar-deliverables-box">
+            <h5>Formal Research Artifacts</h5>
+            <ul>
+              <li>Partially Observable Markov Decision Process (POMDP) state models</li>
+              <li>TLA+ Safety Invariant and Consensus Convergence Proofs</li>
+              <li>Peer-Reviewed RFC Architecture Specifications &amp; FMEA Matrices</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar 2 -->
+      <div class="pillar-card">
+        <div class="pillar-top-meta">
+          <span class="sec-pill" style="margin-bottom: 0;">DISCIPLINE 02 // BARE-METAL RUNTIME</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan-deep); font-weight: 700;">MECHANICAL SYMPATHY</span>
+        </div>
+        <h3 class="pillar-title">Core Systems Engineering &amp; Low-Level Go</h3>
+        <div class="pillar-content-grid">
+          <div class="pillar-body">
+            <p>
+              We author pure Go 1.25+ systems with deep mechanical sympathy for modern superscalar CPU microarchitectures. We eliminate garbage collection pauses by reusing pre-allocated ring buffers via <code>sync.Pool</code>, eliminating runtime reflection in hot-paths, and structuring cache-line boundaries (64-byte structural padding) to prevent CPU false sharing.
+            </p>
+            <p>
+              Our codebases contain zero CGO bridges and zero external shared C libraries. Every binary compiles statically into an independent, hermetic artifact capable of running on bare-metal x86_64 and ARM64 clusters with absolute determinism.
+            </p>
+          </div>
+          <div class="pillar-deliverables-box">
+            <h5>Systems Standards Enforced</h5>
+            <ul>
+              <li>Strict 0 B/op heap allocation on core dispatch hot-paths</li>
+              <li>Automated compiler escape analysis audits (<code>-gcflags="-m"</code>)</li>
+              <li>100% clean race detector passes under maximum synthetic concurrency</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar 3 -->
+      <div class="pillar-card">
+        <div class="pillar-top-meta">
+          <span class="sec-pill" style="margin-bottom: 0;">DISCIPLINE 03 // DEFENSE-GRADE SUBSTRATE</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan-deep); font-weight: 700;">MICROKERNEL SEPARATION</span>
+        </div>
+        <h3 class="pillar-title">AgentOS Microkernel &amp; Hardware Isolation Architecture</h3>
+        <div class="pillar-content-grid">
+          <div class="pillar-body">
+            <p>
+              EIP-Labs designs microkernel operating abstractions where components cannot crash each other. Drawing from aerospace RTOS microkernels, our core (<code>kernel/</code>) remains small, immutable, and strictly independent, treating all drivers, memory tiers, and models as isolated drivers.
+            </p>
+            <p>
+              We bind agent tasks directly to Linux cgroups v2 and isolated user namespaces with <code>pivot_root</code>, ensuring hardware-enforced resource ceilings (CPU quotas, memory caps, file descriptor limits) that prevent rogue prompts from destabilizing the host server.
+            </p>
+          </div>
+          <div class="pillar-deliverables-box">
+            <h5>Kernel Invariants Enforced</h5>
+            <ul>
+              <li>Strict O(1) bitmask middleware lookup arrays (~130ns resolution)</li>
+              <li>Monotonic EpochID fencing against stalled split-brain workers</li>
+              <li>Unprivileged host user namespaces with read-only root filesystems</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar 4 -->
+      <div class="pillar-card">
+        <div class="pillar-top-meta">
+          <span class="sec-pill" style="margin-bottom: 0;">DISCIPLINE 04 // GOVERNANCE &amp; VELOCITY</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan-deep); font-weight: 700;">STABILITY WARRANTIES</span>
+        </div>
+        <h3 class="pillar-title">Product Management &amp; Open-Core Governance</h3>
+        <div class="pillar-content-grid">
+          <div class="pillar-body">
+            <p>
+              World-class engineering requires disciplined product stewardship. At EIP-Labs, product management harmonizes the rapid pace of artificial intelligence research with the non-negotiable stability warranties demanded by mission-critical enterprise infrastructure.
+            </p>
+            <p>
+              We govern the public open-core roadmap, steward the Business Source License 1.1 (BSL 1.1) transition into open-source (LGPL), and curate the type-safe <strong>iiCode</strong> Domain-Specific Language (DSL) to maximize developer velocity without sacrificing performance.
+            </p>
+          </div>
+          <div class="pillar-deliverables-box">
+            <h5>Governance Guarantees</h5>
+            <ul>
+              <li>Strict Semantic Versioning (SemVer) with zero ABI regressions</li>
+              <li>Automated 4-year conversion sunset from BSL 1.1 to LGPL v3</li>
+              <li>Type-safe iiCode DSL reducing agent orchestration boilerplate by 90%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar 5 -->
+      <div class="pillar-card">
+        <div class="pillar-top-meta">
+          <span class="sec-pill" style="margin-bottom: 0;">DISCIPLINE 05 // ENTERPRISE DEPLOYMENTS</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan-deep); font-weight: 700;">SOVEREIGN BLUEPRINTS</span>
+        </div>
+        <h3 class="pillar-title">Enterprise Solution Architecture &amp; Sovereign Engagements</h3>
+        <div class="pillar-content-grid">
+          <div class="pillar-body">
+            <p>
+              Our solution architects bridge laboratory breakthroughs directly into sovereign client environments. We work directly with technical executives, defense systems directors, and algorithmic trading teams to modernize legacy Python stacks and architect high-concurrency clusters.
+            </p>
+            <p>
+              Whether designing air-gapped sovereign military enclaves, sub-millisecond market microstructure nodes, or embedded avionics systems, our architects guarantee seamless production integration under strict enterprise SLAs (99.999% uptime).
+            </p>
+          </div>
+          <div class="pillar-deliverables-box">
+            <h5>Production Deliverables</h5>
+            <ul>
+              <li>Air-gapped enclave provisioning with zero public network dependencies</li>
+              <li>Systematic refactoring blueprints migrating brittle Python into pure Go</li>
+              <li>Industrial bus integration (CAN bus, Modbus SCADA, RS-485 serial)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 4: APPLIED RESEARCH & RESEARCH ENGINEERING ═══════════════ -->
+<section id="research-lifecycle">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; FIRST-PRINCIPLES INVESTIGATION</div>
+      <h2 class="sec-title">Applied Research &amp; Research Engineering Life Cycle</h2>
+      <p class="sec-desc">
+        How EIP-Labs conducts foundational scientific discovery before product conception: formal state modeling, mathematical invariants, and systematic research engineering.
+      </p>
+    </div>
+
+    <div class="research-grid-dual">
+      <div class="research-card-formal">
+        <h4>The Fundamental Research Phase</h4>
+        <p style="color: var(--text-secondary); font-size: 0.96rem; line-height: 1.7; margin-bottom: 1rem;">
+          Every research effort begins by identifying theoretical bottlenecks in existing computing abstractions. We formulate mathematical models proving convergence, worst-case latency bounds, and memory invariants before committing any engineering effort.
+        </p>
+        <ul class="pillar-deliverables-box" style="list-style: none;">
+          <li style="font-size: 0.88rem; margin-bottom: 0.4rem;"><strong>Theoretical Formulation:</strong> Decomposing state-of-the-art literature to isolate theoretical limits.</li>
+          <li style="font-size: 0.88rem; margin-bottom: 0.4rem;"><strong>POMDP Invariant Modeling:</strong> Mathematically modeling agent state spaces and planning bounds.</li>
+          <li style="font-size: 0.88rem;"><strong>TLA+ Formal Verification:</strong> Model-checking distributed locks and quorum consensus safety.</li>
+        </ul>
+      </div>
+
+      <div class="research-card-formal">
+        <h4>The Research Engineering (RE) Methodology</h4>
+        <div class="research-step-chain">
+          <div class="re-step-item">
+            <strong>Step 1: Synthetic Micro-Harness Formulation</strong>
+            <p>Constructing isolated computational testbeds to stress algorithmic primitives in isolation.</p>
+          </div>
+          <div class="re-step-item">
+            <strong>Step 2: Low-Level Proof-of-Concept &amp; Validation</strong>
+            <p>Translating mathematical proofs into raw Go prototypes verifying CPU cache locality and zero heap allocations.</p>
+          </div>
+          <div class="re-step-item">
+            <strong>Step 3: Empirical Boundary Analysis</strong>
+            <p>Profiling amortized cost curves and verifying $O(1)$ hot-path characteristics under extreme load.</p>
+          </div>
+          <div class="re-step-item">
+            <strong>Step 4: Formal Research RFC &amp; Product Handoff</strong>
+            <p>Authoring peer-reviewed RFC specifications and FMEA matrices for production engineering handoff.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 5: PRODUCT MANAGEMENT LIFE CYCLE (PMLC) ═══════════════ -->
+<section id="pmlc">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; PRODUCT STRATEGY &amp; GOVERNANCE</div>
+      <h2 class="sec-title">The Product Management Life Cycle (PMLC)</h2>
+      <p class="sec-desc">
+        How EIP-Labs identifies systemic industry bottlenecks, formalizes rigorous requirements, and stewards high-assurance runtime products from strategic discovery through enterprise release.
+      </p>
+    </div>
+
+    <div class="pmlc-grid">
+      
+      <div class="pmlc-card">
+        <span class="pmlc-step">PHASE 01 // DISCOVERY</span>
+        <h4 class="pmlc-title">Market &amp; Structural Problem Discovery</h4>
+        <p class="pmlc-desc">
+          Systematically identifying structural failure points in existing computing abstractions—such as serialization overhead, unbounded GC latency, and non-deterministic agent prompt chains—to identify where native microkernel primitives are mandatory.
+        </p>
+      </div>
+
+      <div class="pmlc-card">
+        <span class="pmlc-step">PHASE 02 // SPECIFICATION</span>
+        <h4 class="pmlc-title">Formal PRD &amp; Invariant Definition</h4>
+        <p class="pmlc-desc">
+          Drafting rigorous Product Requirements Documents (PRD) defining strict non-functional constraints: microsecond latency ceilings, zero heap allocation budgets, hardware cgroup boundaries, and fail-closed security guarantees.
+        </p>
+      </div>
+
+      <div class="pmlc-card">
+        <span class="pmlc-step">PHASE 03 // TIERING</span>
+        <h4 class="pmlc-title">Open-Core Roadmapping &amp; Licensing Strategy</h4>
+        <p class="pmlc-desc">
+          Partitioning architecture cleanly into open-core runtime foundations (available under BSL 1.1 for developer audit and research) versus proprietary sovereign enterprise modules (dedicated HSM enclaves, multi-region state fabrics).
+        </p>
+      </div>
+
+      <div class="pmlc-card">
+        <span class="pmlc-step">PHASE 04 // EXPERIENCE</span>
+        <h4 class="pmlc-title">Developer Velocity &amp; DX Curation</h4>
+        <p class="pmlc-desc">
+          Designing ergonomic abstractions such as the type-safe iiCode DSL. Ensuring that high-performance, zero-allocation Go hot-paths are intuitive, eliminating complex boilerplate while enforcing compile-time correctness.
+        </p>
+      </div>
+
+      <div class="pmlc-card">
+        <span class="pmlc-step">PHASE 05 // GTM</span>
+        <h4 class="pmlc-title">Commercial Alignment &amp; Enterprise Pilots</h4>
+        <p class="pmlc-desc">
+          Structuring high-touch sovereign proof-of-concept deployments across defense, fintech, and critical infrastructure sectors. Validating empirical SLA benchmarks under client-specific operational traffic.
+        </p>
+      </div>
+
+      <div class="pmlc-card">
+        <span class="pmlc-step">PHASE 06 // STEWARDSHIP</span>
+        <h4 class="pmlc-title">Long-Term Governance &amp; Sunset Automation</h4>
+        <p class="pmlc-desc">
+          Governing semantic versioning freeze warranties (ensuring 5+ years ABI stability for critical drivers) and managing the automated 4-year conversion timeline transitioning BSL 1.1 codebases into open-source LGPL.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 6: AI SOFTWARE ARCHITECTING ═══════════════ -->
+<section id="ai-architecture-adrs">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; ARCHITECTURAL INTEGRITY</div>
+      <h2 class="sec-title">AI Software Architecting</h2>
+      <p class="sec-desc">
+        How EIP-Labs designs AI-native systems software by keeping unpredictable AI output away from critical system control, and how every major technical choice is recorded and enforced with Architecture Decision Records.
+      </p>
+    </div>
+
+    <!-- Layer 1: Boundary Architecture -->
+    <div class="arch-layer-box">
+      <div class="arch-layer-head">
+        <span class="pmlc-step">LAYER 01 // SYSTEM BOUNDARY</span>
+        <h4>Separating AI Guesswork From Deterministic Control</h4>
+      </div>
+      <p class="arch-layer-lead">
+        Standard web applications treat all code as equally trusted. AI systems cannot work that way. A language model produces probabilistic output — it is likely correct, but never guaranteed. Production infrastructure requires guaranteed behavior: the same input must always produce the same safe result. EIP-Labs enforces this with a hard architectural boundary. AI models propose; deterministic code disposes. Every model output is validated, bounded, and authorized by conventional software before it can touch state, memory, or hardware.
+      </p>
+      <div class="arch-principles-grid">
+        <div class="arch-principle-cell">
+          <div class="security-icon">01</div>
+          <h5>Decoupled Inference</h5>
+          <p>
+            Model responses (tokens) never write directly to application state. They pass through a fixed validation gate that only accepts well-formed, authorized commands. Creative AI output and system mutations live on opposite sides of that gate.
+          </p>
+        </div>
+        <div class="arch-principle-cell">
+          <div class="security-icon">02</div>
+          <h5>Failure Domain Isolation</h5>
+          <p>
+            A wrong or hallucinated model answer is treated as a contained fault. It is rejected at the boundary and cannot crash the host process, corrupt memory, or take down the operating system. Bad AI output fails closed, not open.
+          </p>
+        </div>
+        <div class="arch-principle-cell">
+          <div class="security-icon">03</div>
+          <h5>Monotonic State Clocks</h5>
+          <p>
+            Every state change carries a strictly increasing epoch number. Out-of-order or duplicated updates from a delayed replica are discarded. This prevents two nodes from simultaneously believing they own the truth (split-brain divergence).
+          </p>
+        </div>
+        <div class="arch-principle-cell">
+          <div class="security-icon">04</div>
+          <h5>Hardware Affinity</h5>
+          <p>
+            Core data structures are aligned to 64-byte CPU cache lines. This keeps neighboring threads from fighting over the same memory line (false sharing), preserving predictable low-latency execution under load.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 2: ADR Governance -->
+    <div class="arch-layer-box">
+      <div class="arch-layer-head">
+        <span class="pmlc-step">LAYER 02 // DECISION GOVERNANCE</span>
+        <h4>Architecture Decision Records (ADRs)</h4>
+      </div>
+      <p class="arch-layer-lead">
+        Complex systems degrade when nobody remembers why a design was chosen. An Architecture Decision Record is a short, permanent document that captures one important technical decision — the problem, the choice made, the options rejected, and the trade-offs accepted. At EIP-Labs, no structural change enters the codebase without an accepted ADR, and each ADR is linked to an automated compliance check so the decision is enforced by CI/CD, not by memory.
+      </p>
+      <div class="adr-structure-grid">
+        <div class="adr-structure-cell">
+          <span class="adr-field-tag">FIELD 01</span>
+          <h5>Context</h5>
+          <p>The concrete problem or constraint that forced a decision — stated once, with no solution bias.</p>
+        </div>
+        <div class="adr-structure-cell">
+          <span class="adr-field-tag">FIELD 02</span>
+          <h5>Decision</h5>
+          <p>The single approach adopted, written as an active, testable statement the team is now bound to.</p>
+        </div>
+        <div class="adr-structure-cell">
+          <span class="adr-field-tag">FIELD 03</span>
+          <h5>Invariants Enforced</h5>
+          <p>The non-negotiable properties the decision guarantees — measurable limits the runtime must never violate.</p>
+        </div>
+        <div class="adr-structure-cell">
+          <span class="adr-field-tag">FIELD 04</span>
+          <h5>Consequences</h5>
+          <p>Honest gains and costs: what becomes simpler, and what becomes harder — both are recorded.</p>
+        </div>
+        <div class="adr-structure-cell">
+          <span class="adr-field-tag">FIELD 05</span>
+          <h5>Status</h5>
+          <p>Proposed, Accepted, Deprecated, or Superseded — so readers always know if the decision still holds.</p>
+        </div>
+        <div class="adr-structure-cell">
+          <span class="adr-field-tag">FIELD 06</span>
+          <h5>Compliance Hook</h5>
+          <p>A named automated check (unit gate or CI rule) that fails the build if the decision is ever violated.</p>
+        </div>
+      </div>
+      <p class="arch-layer-footnote">
+        Result: architectural intent survives team turnover, review is mechanical rather than opinion-based, and regressions against accepted decisions are caught before merge.
+      </p>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 7: VIBE ARCHITECTING VS CODING/ENGINEERING ═══════════════ -->
+<section id="vibe-architecting">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; THE ENGINEERING REVOLUTION</div>
+      <h2 class="sec-title">Vibe Architecting: Beyond Vibe Coding &amp; Engineering</h2>
+      <p class="sec-desc">
+        How EIP-Labs orchestrates specialized foundation models to produce zero-defect, production-grade Go systems software through multi-agent review loops and exhaustive static analysis.
+      </p>
+    </div>
+
+    <div class="triad-grid">
+      <div class="triad-card">
+        <span class="pmlc-step" style="background: rgba(244, 63, 94, 0.1); color: var(--rose-accent);">AMATEUR LEVEL</span>
+        <h4>Vibe Coding</h4>
+        <p>
+          Casual natural-language prompting ("prompt and pray") without formal specifications, type safety, or architectural boundaries. Produces unmaintainable spaghetti code, memory leaks, and fragile black boxes prone to runtime panics.
+        </p>
+      </div>
+
+      <div class="triad-card">
+        <span class="pmlc-step" style="background: rgba(245, 158, 11, 0.1); color: var(--amber-accent);">INTERMEDIATE LEVEL</span>
+        <h4>Vibe Engineering</h4>
+        <p>
+          Utilizing prompt chains, agentic scratchpads, and basic automated scripts, but still lacking formal systems theory, mechanical sympathy, compiler escape analysis, or deterministic state validation.
+        </p>
+      </div>
+
+      <div class="triad-card highlight">
+        <span class="pmlc-step" style="background: var(--cyan-subtle); color: var(--cyan-dark);">EIP-LABS STANDARD</span>
+        <h4>Vibe Architecting</h4>
+        <p>
+          Analysis-based, research-driven, test-driven architect-level instructions: review, test, adjust, and iterate. The proper AI model is selected for the task, while human supervision guides the AI on what to do and how, where to stop, and where to innovate.
+        </p>
+        <p style="margin-top: 1rem;">
+          A deterministic approach to agentic coding, executed with dedicated tooling rather than open-ended prompting.
+        </p>
+      </div>
+    </div>
+
+    <!-- Static Analysis & Testing Pipeline Box -->
+    <div class="testing-pipeline-box">
+      <h4>Complete Static Analysis &amp; Verification Pipeline</h4>
+      <p class="verify-intro">
+        Before any AI-generated code is committed, it passes through our multi-agent self-correction engine and our exhaustive static analysis test harness, followed by the full verification matrix below:
+      </p>
+
+      <div class="verify-strip">
+        <span class="verify-strip-label">STATIC ANALYSIS GATE // PRE-COMMIT</span>
+        <div class="tools-tag-row">
+          <span class="tool-tag">go vet</span>
+          <span class="tool-tag">govulncheck</span>
+          <span class="tool-tag">escape analysis (-gcflags="-m")</span>
+          <span class="tool-tag">data race detector (-race)</span>
+          <span class="tool-tag">golangci-lint (50+ linters)</span>
+          <span class="tool-tag">gosec security scanner</span>
+          <span class="tool-tag">staticcheck</span>
+          <span class="tool-tag">Semgrep custom AST rules</span>
+          <span class="tool-tag">Trivy SBOM &amp; CVE scan</span>
+          <span class="tool-tag">continuous fuzzing (go test -fuzz)</span>
+        </div>
+      </div>
+
+      <div class="verify-section-label">Verification Matrix // Sections 03–08</div>
+
+      <div class="verify-grid">
+
+        <!-- 03 TEST STRATEGY -->
+        <article class="verify-card">
+          <header class="verify-card-head">
+            <span class="verify-num">03</span>
+            <h5>Test Strategy</h5>
+          </header>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">3.1</span>
+              <strong>Table-Driven Testing</strong>
+            </div>
+            <p>Canonical Go pattern for executing multiple input/output scenarios through a single test runner. All unit tests must use table-driven patterns covering valid, invalid, boundary (zero, max, negative, overflow), and Unicode edge cases.</p>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">3.2</span>
+              <strong>Mutation Testing (Quality of Tests)</strong>
+              <span class="verify-badge optional">Optional Module</span>
+            </div>
+            <div class="verify-note">ENFORCEMENT: Only enabled when MUTATION_THRESHOLD &gt; 0 in config.env. Default: disabled for tier-3, enabled for tier-1/2.</div>
+            <p>To guarantee tests actually assert behavior rather than merely touching lines:</p>
+            <ul>
+              <li>Execute mutation testing: <code class="verify-cmd">go-mutesting ./...</code></li>
+              <li>Pass Threshold: Minimum kill rate from config.env (tier-1: 70%, tier-2: 50%, tier-3: 0/disabled).</li>
+              <li>Survived mutants indicate ineffective assertions or dead logic and must be addressed.</li>
+            </ul>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">3.3</span>
+              <strong>Property-Based Testing</strong>
+            </div>
+            <p>Generates randomized data matching strict schema invariants to discover edge-case input failures:</p>
+            <ul>
+              <li>Use pgregory.net/rapid or gocheck for mathematical operations, token parsers, encoders, and state transitions.</li>
+            </ul>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">3.4</span>
+              <strong>Fuzz Testing (Adversarial Inputs)</strong>
+            </div>
+            <p>All public parsers, serializers, boundary decoders, and validation logic must have fuzz targets:</p>
+            <code class="verify-cmd">go test -fuzz=Fuzz -fuzztime=30s ./...</code>
+            <div class="verify-note danger">Zero crashes, panics, or unbounded memory allocations allowed.</div>
+          </div>
+        </article>
+
+        <!-- 04 DYNAMIC INPUT & ROBUSTNESS -->
+        <article class="verify-card">
+          <header class="verify-card-head">
+            <span class="verify-num">04</span>
+            <h5>Dynamic Input &amp; Robustness Testing</h5>
+          </header>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">4.1</span>
+              <strong>Boundary &amp; Edge Testing</strong>
+            </div>
+            <p>Explicitly tests zero values, integer overflows, max payload sizes, and nil pointers:</p>
+            <ul>
+              <li>Primitive Zero Values: "", 0, 0.0, false</li>
+              <li>Max Boundaries: math.MaxInt64, math.MinInt64</li>
+              <li>Memory bounds: Large payloads exceeding buffer limits</li>
+              <li>nil pointers passed to method receivers and constructors</li>
+            </ul>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">4.2</span>
+              <strong>Stress &amp; Load Testing</strong>
+              <span class="verify-badge enforced">Service Only</span>
+            </div>
+            <div class="verify-note">ENFORCEMENT: Only required for PROJECT_ARCHETYPE="service".</div>
+            <p>Subject services or sub-components to extreme concurrent request volumes to test throughput and connection pooling under strain:</p>
+            <ul>
+              <li>Tools: k6, vegeta, hey</li>
+              <li>CLI / Library / Worker archetypes: Skip stress testing.</li>
+            </ul>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">4.3</span>
+              <strong>Soak / Longevity Testing</strong>
+              <span class="verify-badge optional">Optional Module</span>
+            </div>
+            <div class="verify-note">ENFORCEMENT: Only required for PROJECT_ARCHETYPE="service" at tier-1.</div>
+            <p>Runs sustained load over prolonged periods to identify slow memory leaks, goroutine leaks, or resource exhaustion:</p>
+            <ul>
+              <li>Duration: Minimum 60 minutes at 1.5x normal load</li>
+              <li>Verify memory stability and goroutine count stabilization</li>
+              <li>CLI / Library / Serverless archetypes: Skip soak testing.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 05 INTEGRATION & SYSTEM-LEVEL -->
+        <article class="verify-card">
+          <header class="verify-card-head">
+            <span class="verify-num">05</span>
+            <h5>Integration &amp; System-Level Testing</h5>
+          </header>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">5.1</span>
+              <strong>Integration Testing</strong>
+            </div>
+            <p>Spins up real ephemeral infrastructure (PostgreSQL, Redis, Kafka) inside Docker during test execution to verify real drivers:</p>
+            <code class="verify-cmd">go test -v -tags=integration -race ./...</code>
+            <ul>
+              <li>Tools: dockertest, testcontainers-go</li>
+            </ul>
+            <div class="verify-note">Note: Requires a running Docker daemon. Skip in air-gapped CI or Docker-in-Docker environments.</div>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">5.2</span>
+              <strong>Contract Testing</strong>
+              <span class="verify-badge optional">Optional Module</span>
+            </div>
+            <div class="verify-note">ENFORCEMENT: Only required for PROJECT_ARCHETYPE="service" with multi-service dependencies.</div>
+            <p>Validates API request/response schemas between microservices without needing full end-to-end integration environments:</p>
+            <ul>
+              <li>Tool: pact-go</li>
+              <li>Single-service / CLI / Library archetypes: Skip contract testing.</li>
+            </ul>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">5.3</span>
+              <strong>End-to-End (E2E) Testing</strong>
+            </div>
+            <p>Executes full execution paths across the entire compiled binary, HTTP handlers, database, and messaging layers.</p>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">5.4</span>
+              <strong>Regression Testing</strong>
+            </div>
+            <p>Automated execution of past bug scenarios to ensure fixed defects do not reappear.</p>
+          </div>
+        </article>
+
+        <!-- 06 RESILIENCE & RELIABILITY -->
+        <article class="verify-card">
+          <header class="verify-card-head">
+            <span class="verify-num">06</span>
+            <h5>Resilience &amp; Reliability Testing</h5>
+          </header>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">6.1</span>
+              <strong>Fault Injection Testing</strong>
+            </div>
+            <p>Simulates context cancellations, timeout breaches, database connection drops, and HTTP 5xx responses inside application code.</p>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">6.2</span>
+              <strong>Recovery &amp; Failover Testing</strong>
+            </div>
+            <p>Verifies graceful degradation, retry policies, circuit breaker triggers, and state restoration during outages.</p>
+          </div>
+        </article>
+
+        <!-- 07 SECURITY & PRIVACY -->
+        <article class="verify-card">
+          <header class="verify-card-head">
+            <span class="verify-num">07</span>
+            <h5>Security &amp; Privacy Testing</h5>
+          </header>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">7.1</span>
+              <strong>Dynamic Application Security Testing (DAST)</strong>
+            </div>
+            <p>Scans running application endpoints for vulnerabilities (e.g., OWASP Top 10, SQL injection, XSS).</p>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">7.2</span>
+              <strong>API Fuzzing / Schema Validation</strong>
+            </div>
+            <p>Validates API routes against OpenAPI/Swagger specs with malformed payloads.</p>
+          </div>
+        </article>
+
+        <!-- 08 RUNTIME ANALYSIS -->
+        <article class="verify-card">
+          <header class="verify-card-head">
+            <span class="verify-num">08</span>
+            <h5>Runtime Analysis &amp; Instrumentation</h5>
+          </header>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">8.1</span>
+              <strong>Race Condition Detection</strong>
+            </div>
+            <p>Built-in Go ThreadSanitizer that dynamically detects unsynchronized concurrent memory reads/writes:</p>
+            <code class="verify-cmd">go test -race ./...</code>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">8.2</span>
+              <strong>Code Coverage Analysis</strong>
+            </div>
+            <p>Measures branch and line coverage during test runs to find untested execution paths:</p>
+            <code class="verify-cmd">go test -coverprofile=coverage.out ./...</code>
+          </div>
+
+          <div class="verify-item">
+            <div class="verify-item-head">
+              <span class="verify-item-id">8.3</span>
+              <strong>Memory &amp; Goroutine Leak Detection</strong>
+            </div>
+            <p>Checks that no unexpected goroutines or dangling memory references remain active after test completion:</p>
+            <ul>
+              <li>Tool: uber-go/goleak</li>
+            </ul>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="verify-section-label">Authoring Invariants &amp; Policies // Sections 09–11</div>
+
+      <div class="verify-policies">
+
+        <!-- 09 INVARIANTS -->
+        <article class="verify-policy">
+          <header class="verify-card-head">
+            <span class="verify-num">09</span>
+            <h5>Test Authoring Invariants</h5>
+          </header>
+          <ul>
+            <li><strong>Deterministic Execution:</strong> Tests must not rely on wall-clock time (time.Sleep), random seeds without fixed initialization, or uncontrolled network state.</li>
+            <li><strong>Hermetic Isolation:</strong> Each test must initialize and clean up its own resources. Tests must never depend on execution order.</li>
+            <li><strong>Meaningful Assertions:</strong> Every test must assert specific error codes or message contents, not merely err != nil.</li>
+          </ul>
+        </article>
+
+        <!-- 10 MOCKING POLICY -->
+        <article class="verify-policy">
+          <header class="verify-card-head">
+            <span class="verify-num">10</span>
+            <h5>Mocking &amp; Test Doubles Policy</h5>
+          </header>
+          <ul>
+            <li><strong>Mock Interfaces (Ports), Never Concrete Implementations:</strong> Mocks or stubs are permitted only for boundaries defined in ports/ (e.g., database repositories, third-party payment gateways, message publishers).</li>
+            <li><strong>No Mocking Internal Business Logic:</strong> Domain entities, value objects, and pure business calculations must be tested using real instances, not mocks.</li>
+            <li><strong>Contract Verification:</strong> Mock behaviors must strictly adhere to the interface contracts documented in Phase 2.</li>
+          </ul>
+        </article>
+
+        <!-- 11 FLAKY POLICY -->
+        <article class="verify-policy">
+          <header class="verify-card-head">
+            <span class="verify-num">11</span>
+            <h5>Flaky Test Zero-Tolerance Policy</h5>
+          </header>
+          <p>A test that passes and fails intermittently without code modifications is classified as a Flaky Test. Flaky tests represent a breakdown of determinism and must never be ignored or re-run until they pass.</p>
+          <div class="verify-note danger">Action: If a test flakes, the agent must identify the root cause (unbounded concurrency, race conditions, global state, or time reliance) and eliminate it.</div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 8: AGENTIC AI (ALIGNED EQUAL-HEIGHT CARDS) ═══════════════ -->
+<section id="agentic-ai-dev">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; SYSTEMIC AGENT ARCHITECTURE</div>
+      <h2 class="sec-title">Agentic AI Development From Scratch</h2>
+      <p class="sec-desc">
+        Demystifying how high-assurance autonomous agents are constructed from bare silicon up: where they sit in the computing hierarchy, how they develop, test, benchmark, and execute in production.
+      </p>
+    </div>
+
+    <div class="agentic-uniform-grid">
+      
+      <div class="agentic-card-uniform">
+        <h4><span>[01]</span> Where It Sits in the Hierarchy</h4>
+        <p>
+          In the EIP architecture, autonomous agents do not sit in user-space script interpreters. The AgentOS microkernel positions agents as first-class operating system processes directly between the host Linux kernel and application services.
+        </p>
+        <ul class="agentic-list-uniform">
+          <li>Direct integration with Linux cgroups v2 resource controllers</li>
+          <li>In-process atomic pointer swapping eliminating network serialization</li>
+          <li>Hardware-isolated sandboxing via Linux user namespaces</li>
+        </ul>
+      </div>
+
+      <div class="agentic-card-uniform">
+        <h4><span>[02]</span> How It Develops From Line Zero</h4>
+        <p>
+          We construct agent runtimes from bare primitives: ring-buffered memory pools, atomic scheduler queues, dynamic context-window pruning routines, prompt-compilation pipelines, and deterministic capability brokers.
+        </p>
+        <ul class="agentic-list-uniform">
+          <li>Pre-warmed generic Skeletons eliminate heap allocation during spawn</li>
+          <li>Bitmask middleware compilation (~130ns lookup) for instant governance</li>
+          <li>Lock-free ring buffers for multi-agent inter-process communication</li>
+        </ul>
+      </div>
+
+      <div class="agentic-card-uniform">
+        <h4><span>[03]</span> How It Tests &amp; Verifies</h4>
+        <p>
+          Testing moves beyond probabilistic assertions. We utilize deterministic replay harnesses that record every token and memory mutation, combined with synthetic fuzzing of untrusted tool outputs.
+        </p>
+        <ul class="agentic-list-uniform">
+          <li>Multi-turn trajectory regression suites verifying reasoning coherence</li>
+          <li>Continuous fuzzing of JSON schemas and dynamic function parameters</li>
+          <li>EpochID boundary testing verifying instant state rollback upon failure</li>
+        </ul>
+      </div>
+
+      <div class="agentic-card-uniform">
+        <h4><span>[04]</span> How It Benchmarks</h4>
+        <p>
+          Rigorous systems evaluation measuring hard operational metrics under sustained load, guaranteeing predictability before deployment into client environments.
+        </p>
+        <ul class="agentic-list-uniform">
+          <li>Time-to-First-Action (TTFA) measured in microseconds</li>
+          <li>Strict verification of 0 B/op heap allocation on core dispatch routes</li>
+          <li>Multi-agent swarm convergence velocity under network partitions</li>
+        </ul>
+      </div>
+
+      <div class="agentic-card-uniform span-full">
+        <h4><span>[05]</span> How It Operates in Production</h4>
+        <p>
+          In live clusters, agents operate with autonomous execution capabilities governed by deterministic safety boundaries. If an agent encounters an unmodeled condition, circuit breakers trip, isolating the agent and escalating state to human operators without host interruption.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 0.8rem;">
+          <div style="font-size: 0.88rem; color: var(--text-secondary);"><strong>Autonomous Swarm Quorums:</strong> Mathematical consensus gating preventing rogue prompt state mutations.</div>
+          <div style="font-size: 0.88rem; color: var(--text-secondary);"><strong>Human-in-the-Loop Gating:</strong> Type-safe escalation protocols for high-consequence operations.</div>
+          <div style="font-size: 0.88rem; color: var(--text-secondary);"><strong>Self-Healing Recovery:</strong> Automatic isolation, eviction, and skeleton rejuvenation in microseconds.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 9: STANDARD SDLC HIGH-ASSURANCE PHASES ═══════════════ -->
+<section id="sdlc">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; SOFTWARE ENGINEERING EXCELLENCE</div>
+      <h2 class="sec-title">Standard Software Development Life Cycle (SDLC)</h2>
+      <p class="sec-desc">
+        The universal software development lifecycle executed with aerospace-grade rigor. From formal requirements engineering to hermetic compilation and site reliability engineering.
+      </p>
+    </div>
+
+    <div class="sdlc-flow">
+      
+      <!-- Phase 1 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">01</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Requirements Engineering &amp; Formal Domain Modeling</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">SPECIFICATION</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Translating business and operational objectives into unambiguous state machines, formal RFC documents, and mathematically proven state invariants. Establishing latency bounds and amortized cost models before writing code.
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>POMDP formulation, state machine mapping, latency budget bounding.</div>
+          <div><strong>Gate Deliverable</strong>Formal RFC Specification, TLA+ safety proofs, FMEA risk matrix.</div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">02</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Architectural &amp; Systems Design</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">ARCHITECTURE</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Defining compile-time typed interface contracts, memory layout schematics, and microkernel separation boundaries. Modeling memory alignment, cache-line false sharing prevention, and isolation barriers.
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>Microkernel driver abstraction, bitmask permutation modeling, memory bus design.</div>
+          <div><strong>Gate Deliverable</strong>Typed Interface Specifications (iiCode), Kernel Boundary Defense Proof.</div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">03</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Implementation &amp; Mechanical Sympathy</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">DEVELOPMENT</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Writing pure Go 1.25+ code with strict mechanical sympathy. Hot-paths are verified for zero heap allocations via compiler escape analysis (<code>-gcflags="-m"</code>), utilizing <code>sync.Pool</code> and atomic lock-free pointers.
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>Escape analysis validation, CPU profiling via pprof, lock-free ring buffering.</div>
+          <div><strong>Gate Deliverable</strong>0 B/op Core Verification Log, Pure Go Source Artifacts, Trace Profiles.</div>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">04</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Verification, Continuous Chaos &amp; Fuzz Testing</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">QUALITY ASSURANCE</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Subjecting code to automated verification: unit suites, continuous corpus fuzzing across 500+ targets, and Jepsen-style network partition simulations to guarantee fail-closed transactional rollback.
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>Adversarial chaos injection, split-brain lease fencing, continuous fuzzing.</div>
+          <div><strong>Gate Deliverable</strong>Race Detector Clean Pass (<code>-race</code>), 72-Hour Zero-Leak Soak Certificate.</div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">05</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Hermetic Packaging &amp; Binary Attestation</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">PACKAGING</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Compiling code into a single, hermetic, self-contained binary (&lt;30MB) using standard Go toolchains with zero CGO dependencies. Signing binaries cryptographically and generating Software Bills of Materials (SBOM).
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>Cross-compilation (x86_64, ARM64), Cosign cryptographic signing, SBOM generation.</div>
+          <div><strong>Gate Deliverable</strong>Single Static Production Binary, CycloneDX SBOM, SHA-256 Digest Manifest.</div>
+        </div>
+      </div>
+
+      <!-- Phase 6 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">06</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Deployment Engineering &amp; Sovereign Orchestration</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">DEPLOYMENT</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Rolling out binaries into sovereign client infrastructure with zero-downtime blue/green switches, isolated health probes, and dedicated Unix domain operator sockets for out-of-band management.
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>Air-gapped enclave installation, operator socket wiring, eBPF gate rate-limiting.</div>
+          <div><strong>Gate Deliverable</strong>Production Cluster Attestation, Disaster Recovery Runbook, SLA Binding.</div>
+        </div>
+      </div>
+
+      <!-- Phase 7 -->
+      <div class="sdlc-row">
+        <div class="sdlc-dot">07</div>
+        <div class="sdlc-row-header">
+          <h3 class="sdlc-row-title">Continuous Maintenance, Observability &amp; SRE</h3>
+          <span class="sec-pill" style="margin-bottom: 0;">OPERATIONS</span>
+        </div>
+        <p class="sdlc-row-desc">
+          Monitoring production runtimes via zero-overhead OpenTelemetry spans and eBPF kernel event probes. Enforcing automated canary evaluation and instant microsecond rollback upon invariant violation.
+        </p>
+        <div class="sdlc-specs-inline">
+          <div><strong>Core Activities</strong>Sub-microsecond trace export, runtime invariant probing, automated live canaries.</div>
+          <div><strong>Gate Deliverable</strong>99.999% SLA Uptime Log, Real-Time SIEM Telemetry Feed, 24/7 SRE Escalation.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 10: CI/CD PIPELINES ═══════════════ -->
+<section id="cicd-pipelines">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; CONTINUOUS INTEGRATION &amp; DELIVERY</div>
+      <h2 class="sec-title">CI/CD Pipelines</h2>
+      <p class="sec-desc">
+        The fail-closed delivery machinery behind every EIP-Labs project: every commit walks the same scripted path from pre-flight lint through signed, reproducible release artifacts — gates block, they never warn.
+      </p>
+    </div>
+
+    <div class="cicd-principles">
+      <div class="cicd-principle">
+        <h5>Everything-as-Code</h5>
+        <p>Workflows, runners, secrets policy, and branch protections live in version control and change only through reviewed PRs.</p>
+      </div>
+      <div class="cicd-principle">
+        <h5>Fail-Closed Gates</h5>
+        <p>Any red check blocks merge and deploy. Warnings are treated as failures; there is no override without an accepted ADR.</p>
+      </div>
+      <div class="cicd-principle">
+        <h5>Hermetic Runners</h5>
+        <p>Ephemeral, pinned-toolchain containers with no ambient credentials — same Go version and flags locally and in CI.</p>
+      </div>
+      <div class="cicd-principle">
+        <h5>Signed Immutable Artifacts</h5>
+        <p>Reproducible builds emit checksummed binaries, SBOMs, and cosign signatures; deploys consume only attested artifacts.</p>
+      </div>
+    </div>
+
+    <div class="cicd-rail" aria-hidden="true">
+      <div class="cicd-rail-node"><span class="cicd-rail-dot">01</span><span class="cicd-rail-label">Commit</span></div>
+      <div class="cicd-rail-arrow"></div>
+      <div class="cicd-rail-node"><span class="cicd-rail-dot">02</span><span class="cicd-rail-label">Analyze</span></div>
+      <div class="cicd-rail-arrow"></div>
+      <div class="cicd-rail-node"><span class="cicd-rail-dot">03</span><span class="cicd-rail-label">Test</span></div>
+      <div class="cicd-rail-arrow"></div>
+      <div class="cicd-rail-node"><span class="cicd-rail-dot">04</span><span class="cicd-rail-label">Deep QA</span></div>
+      <div class="cicd-rail-arrow"></div>
+      <div class="cicd-rail-node"><span class="cicd-rail-dot">05</span><span class="cicd-rail-label">Secure</span></div>
+      <div class="cicd-rail-arrow"></div>
+      <div class="cicd-rail-node"><span class="cicd-rail-dot">06</span><span class="cicd-rail-label">Build &amp; Deploy</span></div>
+    </div>
+
+    <div class="cicd-grid">
+
+      <article class="cicd-stage">
+        <header class="cicd-stage-head">
+          <span class="cicd-stage-num">01</span>
+          <h5>Commit &amp; Pre-Flight</h5>
+        </header>
+        <p>Protected branches reject unsigned commits and direct pushes. Pre-commit hooks run the same formatters and linters CI will run, so failures surface before the pipeline starts.</p>
+        <div class="tools-tag-row">
+          <span class="tool-tag">gofmt / goimports</span>
+          <span class="tool-tag">golangci-lint</span>
+          <span class="tool-tag">commit signature verify</span>
+          <span class="tool-tag">branch protection</span>
+        </div>
+        <div class="cicd-gate">
+          <strong>Gate</strong>
+          Zero diff after gofmt; lint clean; signed commit on feature branch PR.
+        </div>
+      </article>
+
+      <article class="cicd-stage">
+        <header class="cicd-stage-head">
+          <span class="cicd-stage-num">02</span>
+          <h5>Static Analysis Gate</h5>
+        </header>
+        <p>Parallel static jobs parse the full AST surface: vet diagnostics, 50+ linters, semgrep rules, and ADR-linked compliance checks that enforce architectural decisions recorded in Phase 2.</p>
+        <div class="tools-tag-row">
+          <span class="tool-tag">go vet</span>
+          <span class="tool-tag">staticcheck</span>
+          <span class="tool-tag">gosec</span>
+          <span class="tool-tag">Semgrep AST rules</span>
+          <span class="tool-tag">ADR compliance checks</span>
+        </div>
+        <div class="cicd-gate">
+          <strong>Gate</strong>
+          No vet/staticcheck findings; zero high/critical gosec or Semgrep hits.
+        </div>
+      </article>
+
+      <article class="cicd-stage">
+        <header class="cicd-stage-head">
+          <span class="cicd-stage-num">03</span>
+          <h5>Unit &amp; Race Verification</h5>
+        </header>
+        <p>Table-driven unit suites run under the race detector with coverage thresholds. Hermetic, order-independent tests only — flaky tests fail the pipeline, never get re-run to green.</p>
+        <div class="tools-tag-row">
+          <span class="tool-tag">go test -race ./...</span>
+          <span class="tool-tag">coverprofile threshold</span>
+          <span class="tool-tag">goleak</span>
+        </div>
+        <div class="cicd-gate">
+          <strong>Gate</strong>
+          Race-clean; coverage ≥ tier threshold; zero flaky retries allowed.
+        </div>
+      </article>
+
+      <article class="cicd-stage">
+        <header class="cicd-stage-head">
+          <span class="cicd-stage-num">04</span>
+          <h5>Deep Quality Gate</h5>
+        </header>
+        <p>Tier-aware deep checks: mutation kill-rate for tier-1/2, property-based generators on parsers and encoders, and timed fuzz campaigns against all public validation surfaces.</p>
+        <div class="tools-tag-row">
+          <span class="tool-tag">go-mutesting (MUTATION_THRESHOLD)</span>
+          <span class="tool-tag">pgregory.net/rapid</span>
+          <span class="tool-tag">go test -fuzz=Fuzz -fuzztime=30s</span>
+        </div>
+        <div class="cicd-gate">
+          <strong>Gate</strong>
+          Kill rate ≥ tier threshold; zero fuzz crashes, panics, or OOMs.
+        </div>
+      </article>
+
+      <article class="cicd-stage">
+        <header class="cicd-stage-head">
+          <span class="cicd-stage-num">05</span>
+          <h5>Security &amp; Supply Chain</h5>
+        </header>
+        <p>Dependency vulnerability scanning, license policy, and SBOM generation run on every PR; container and release images get CVE scans before promotion.</p>
+        <div class="tools-tag-row">
+          <span class="tool-tag">govulncheck</span>
+          <span class="tool-tag">Trivy SBOM &amp; CVE</span>
+          <span class="tool-tag">license policy scan</span>
+          <span class="tool-tag">cosign sign</span>
+        </div>
+        <div class="cicd-gate">
+          <strong>Gate</strong>
+          No known-vulnerable deps in path; SBOM attached; artifact signed.
+        </div>
+      </article>
+
+      <article class="cicd-stage">
+        <header class="cicd-stage-head">
+          <span class="cicd-stage-num">06</span>
+          <h5>Build, Integration &amp; Deploy</h5>
+        </header>
+        <p>Reproducible multi-arch builds feed ephemeral-infrastructure integration tests, then progressive delivery with automated canary evaluation and instant rollback on invariant violation.</p>
+        <div class="tools-tag-row">
+          <span class="tool-tag">CGO_ENABLED=0 hermetic build</span>
+          <span class="tool-tag">testcontainers-go</span>
+          <span class="tool-tag">go test -tags=integration -race</span>
+          <span class="tool-tag">canary / blue-green</span>
+        </div>
+        <div class="cicd-gate">
+          <strong>Gate</strong>
+          Byte-identical rebuild checksum; integration green; canary SLOs hold.
+        </div>
+      </article>
+
+    </div>
+
+    <div class="cicd-env-strip">
+      <div class="cicd-env">
+        <h5>Pull Request // Ephemeral</h5>
+        <p>Stages 01–05 on every PR. Integration jobs spin ephemeral Postgres/Redis/Kafka; review environments tear down with the branch.</p>
+      </div>
+      <div class="cicd-env">
+        <h5>Main // Canary</h5>
+        <p>Full matrix including soak where archetype requires it. Progressive canary with automated rollback wired to runtime invariant probes.</p>
+      </div>
+      <div class="cicd-env">
+        <h5>Tag // Production Release</h5>
+        <p>Signed, attested artifacts only. Deploy is a digest pin — no rebuild at release time; provenance travels with the binary.</p>
+      </div>
+    </div>
+
+    <!-- ═══ Vibe Architect Harness (vah) — Purple Detail Block ═══ -->
+    <div class="vah-box">
+      <div class="vah-head">
+        <span class="vah-badge">CI Gatekeeper</span>
+        <h4>Vibe Architect Harness (vah)</h4>
+      </div>
+
+      <p class="vah-tagline">
+        Active governance for AI coding agents. Deterministic. Auditable. Zero-dependency.
+      </p>
+
+      <p class="vah-lead">
+        <strong>Vibe Architect Harness (<code style="font-family: var(--font-mono); color: #6d28d9;">vah</code>)</strong>
+        is a single, zero-dependency Go binary that turns passive prompt governance into an active execution harness for AI coding agents.
+        When agents (Claude Code, Cursor, Aider, Roo, Codex) work on complex multi-file projects, <code style="font-family: var(--font-mono); color: #6d28d9;">vah</code>
+        is not the agent — it is the harness that makes those agents accountable, auditable, and production-ready inside the EIP-Labs pipeline.
+      </p>
+
+      <div class="vah-section-label">Critical Failures &amp; Deterministic Fixes</div>
+
+      <div class="vah-table-wrap">
+        <table class="vah-table">
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>How vah Solves It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lost in the Middle — stuffing 10+ markdown files into context dilutes attention</td>
+              <td><strong>JIT Context Slicing</strong> — extracts only the exact tokens required for the current subtask (~80% less overhead)</td>
+            </tr>
+            <tr>
+              <td>Hallucinated State — agents invent diffs, omit files, misreport line numbers in CHANGES.md</td>
+              <td><strong>Git-Backed Ground Truth</strong> — reads <code style="font-family: var(--font-mono);">git status</code> and <code style="font-family: var(--font-mono);">git diff --numstat</code> to authoritatively maintain state</td>
+            </tr>
+            <tr>
+              <td>Passive Gating — agents declare "done" despite failing background tests</td>
+              <td><strong>Deterministic Gatekeeper</strong> — executes linters, tests, and security audits, captures exit codes, formats diagnostics for remediation loops</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="vah-section-label">5-Stage Verification Pipeline</div>
+
+      <div class="vah-pipeline-stages">
+        <div class="vah-stage-cell">
+          <strong>Format</strong>
+          <code>gofmt -l .</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Static Analysis</strong>
+          <code>golangci-lint run ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Typecheck</strong>
+          <code>go vet ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Tests</strong>
+          <code>go test -race -coverprofile=coverage.out ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Security Audit</strong>
+          <code>govulncheck ./...</code>
+        </div>
+        <div class="vah-stage-cell">
+          <strong>Coverage</strong>
+          <code>go tool cover -func=coverage.out</code>
+        </div>
+      </div>
+
+      <div class="vah-note">
+        <strong>Gate behavior:</strong> each stage captures exit codes and output. If any stage fails, structured diagnostics are returned for AI agent remediation — never a soft warning.
+      </div>
+
+      <div class="vah-section-label">Core Workflow &amp; Natural Language Control Plane</div>
+
+      <div class="vah-grid-3">
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">01</span>
+            <h5>Core Commands</h5>
+          </header>
+          <p>Deterministic CLI surface used by humans and agents alike:</p>
+          <code class="vah-cmd">vah init</code>
+          <code class="vah-cmd">vah verify</code>
+          <code class="vah-cmd">vah sync</code>
+          <code class="vah-cmd">vah review</code>
+          <code class="vah-cmd">vah doctor</code>
+          <code class="vah-cmd">vah bench · vah docs · vah emergency override</code>
+        </article>
+
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">02</span>
+            <h5>Natural Language — vah do</h5>
+          </header>
+          <p>Pattern-matched intent routing with optional GenAI fallback and report synthesis:</p>
+          <code class="vah-cmd">vah do "verify the tests"</code>
+          <code class="vah-cmd">vah do "fix the security gate"</code>
+          <code class="vah-cmd">vah do "show me the planning context"</code>
+          <code class="vah-cmd">vah do "sync my changes"</code>
+          <code class="vah-cmd">vah do "review my workspace"</code>
+          <code class="vah-cmd">vah do "health check"</code>
+        </article>
+
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">03</span>
+            <h5>JIT Context &amp; Fix Gates</h5>
+          </header>
+          <p>Ephemeral, stateless prompt compiler — phase-aware, archetype-filtered, token-limited:</p>
+          <code class="vah-cmd">vah context --phase=[Plan]</code>
+          <code class="vah-cmd">vah context --phase=[Code]</code>
+          <code class="vah-cmd">vah context --phase=[Verify]</code>
+          <code class="vah-cmd">vah context fix --gate=security|error|performance|testing|audit|deploy|ci-cd|domain|schema</code>
+          <code class="vah-cmd">vah context gates</code>
+        </article>
+      </div>
+
+      <div class="vah-flow" style="margin-top: 1rem;">
+        <span class="vah-flow-step">User Input</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">Pattern Matching (fast, deterministic)</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">Intent Parsing</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">Command Execution</span>
+        <span class="vah-flow-arrow">→</span>
+        <span class="vah-flow-step">GenAI Report Synthesis (optional)</span>
+      </div>
+
+      <div class="vah-section-label">Use Cases in the EIP-Labs Pipeline</div>
+
+      <div class="vah-grid-2">
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">A</span>
+            <h5>Solo Developer with AI Agents</h5>
+          </header>
+          <p><code style="font-family: var(--font-mono); color: #6d28d9;">vah verify</code> runs after every change to catch lint violations, test failures, and security issues before they ship. <code style="font-family: var(--font-mono); color: #6d28d9;">vah sync</code> keeps CHANGES.md accurate without hallucination.</p>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">B</span>
+            <h5>Team Governance Automation (CI Gatekeeper)</h5>
+          </header>
+          <p>Every PR goes through <code style="font-family: var(--font-mono); color: #6d28d9;">vah verify</code> — a deterministic 5-stage pipeline (format, lint, vet, tests, security audit) with structured diagnostics. No more "it works on my machine."</p>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">C</span>
+            <h5>AI Agent Self-Correction Loop</h5>
+          </header>
+          <p>An agent runs <code style="font-family: var(--font-mono); color: #6d28d9;">vah do "verify the tests"</code>. On failure, raw compiler/linter output is translated into an actionable natural-language briefing the agent can remediate against.</p>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">D</span>
+            <h5>ADRs, Debt &amp; Context-Aware Prompts</h5>
+          </header>
+          <ul>
+            <li><code style="font-family: var(--font-mono);">vah adr new "Use PostgreSQL" --decision=... --context=...</code> — DECISIONS.md auto-synced</li>
+            <li><code style="font-family: var(--font-mono);">vah debt scan</code> — TODO/FIXME/HACK/XXX with severity, synced to DEBT.md</li>
+            <li><code style="font-family: var(--font-mono);">vah context fix --gate=security</code> — ~200-token governance slice instead of dumping all of .governance/</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="vah-section-label">Architecture — Hexagonal (Ports &amp; Adapters)</div>
+
+      <div class="vah-grid-2">
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">⬡</span>
+            <h5>Layers</h5>
+          </header>
+          <ul>
+            <li><strong>cmd/vah/</strong> — CLI entry (Cobra commands)</li>
+            <li><strong>application/</strong> — ContextCompiler, GatekeeperService, NLPController, MemorySync, PlannerService, ReviewerService, DebtService, ADRService, E2EGate</li>
+            <li><strong>ports/</strong> — ConfigRepository, VCSClient, CommandRunner, GenAIClient</li>
+            <li><strong>adapters/</strong> — config env_parser, git client, process runner, //go:embed FS, genai (Ollama / Groq / OpenAI-compatible)</li>
+            <li><strong>domain/</strong> — ProjectConfig, FileDelta, VerificationReport, CommandIntent, ActionResult, LifecyclePhase — zero external deps</li>
+          </ul>
+        </article>
+        <article class="vah-card">
+          <header class="vah-card-head">
+            <span class="vah-num">§</span>
+            <h5>Embedded Governance Framework</h5>
+          </header>
+          <p>22-file, 7-category framework compiled into the binary via <code style="font-family: var(--font-mono); color: #6d28d9;">go:embed</code>. Overlay filesystem: local disk always wins — edit or drop new <code style="font-family: var(--font-mono);">.md</code> rules with no recompile:</p>
+          <ul>
+            <li><strong>1-core/</strong> — master protocol, manifest, context template, ADR standards</li>
+            <li><strong>2-domain/</strong> — ubiquitous language, system context, schemas, threat model</li>
+            <li><strong>3-standards/</strong> — clean code, security, error handling, observability, performance</li>
+            <li><strong>4-verification/</strong> — QA, testing, audit, benchmarks</li>
+            <li><strong>5-operations/</strong> — deploy, CI/CD, release, emergency, manual</li>
+            <li><strong>6-feedback/</strong> — refinement and debt tracking</li>
+            <li><strong>profiles/</strong> — language-specific profiles (Go)</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="vah-section-label">8 Foundational Rules</div>
+
+      <div class="vah-rules">
+        <div class="vah-rule">
+          <strong>01 · No Unchecked Code</strong>
+          <span>Must pass <code style="font-family: var(--font-mono);">make verify</code> before merge.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>02 · Domain First</strong>
+          <span>Adhere to the ubiquitous language in every symbol and commit.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>03 · Deterministic Memory</strong>
+          <span>Sync CONTEXT.md and CHANGES.md from real git state.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>04 · Zero Ignored Warnings</strong>
+          <span>No linter suppressions without an accepted ADR.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>05 · Zero-Trust Secrets</strong>
+          <span>No secrets in code; zero-trust security posture throughout.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>06 · Architectural Bound</strong>
+          <span>ADRs required for every structural shift.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>07 · Performance Budgets</strong>
+          <span>Latency and allocation constraints enforced in CI.</span>
+        </div>
+        <div class="vah-rule">
+          <strong>08 · Explicit Escalation</strong>
+          <span>Halt for human direction on ambiguity — never guess.</span>
+        </div>
+      </div>
+
+      <div class="vah-section-label">3-Phase Agent Lifecycle</div>
+
+      <div class="vah-lifecycle">
+        <span class="vah-phase">[Plan]</span>
+        <span class="vah-phase-arrow">→</span>
+        <span class="vah-phase">[Code]</span>
+        <span class="vah-phase-arrow">→</span>
+        <span class="vah-phase">[Verify]</span>
+        <span class="vah-phase-arrow">↻</span>
+        <span class="vah-phase escalation">[Escalation]</span>
+        <span class="vah-phase-arrow">→</span>
+        <span class="vah-phase">[Plan]</span>
+      </div>
+
+      <div class="vah-meta-row">
+        <div class="vah-meta">
+          <h5>Workspace State Files</h5>
+          <p><code style="font-family: var(--font-mono);">vah init</code> scaffolds config.env, .governance/, CONTEXT.md, CHANGES.md, DECISIONS.md, DEBT.md, BENCHMARK.md, DOCS.md.</p>
+        </div>
+        <div class="vah-meta">
+          <h5>Governance Tiers</h5>
+          <p>tier-1-mission-critical (all gates, strict) · tier-2-standard (default) · tier-3-prototype (minimal, relaxed).</p>
+        </div>
+        <div class="vah-meta">
+          <h5>Project Archetypes</h5>
+          <p>service · cli · library · worker · serverless — archetype filters which rules JIT context injects.</p>
+        </div>
+        <div class="vah-meta">
+          <h5>GenAI Providers</h5>
+          <p>Ollama (local, granite4.1:3b) · Groq (openai/gpt-oss-120b) · OpenAI-compatible — intent parsing + executive briefings.</p>
+        </div>
+      </div>
+
+      <div class="vah-note">
+        <strong>Emergency override:</strong> <code style="font-family: var(--font-mono);">vah emergency override ENG-123 --reason="..." --force-human-override</code>
+        bypasses all verification gates, is tracked in CHANGES.md, and requires reconciliation within 24 hours.
+        <br style="line-height: 1.8;" />
+        <strong>Install:</strong> single static binary — <code style="font-family: var(--font-mono);">go install ./cmd/vah</code> globally on $PATH (never committed into project repos).
+        License: Apache 2.0. Author: E.A.K.
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 11: THE FLEXIBILITY MINDSET ═══════════════ -->
+<section id="flexibility-mindset">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; ARCHITECTURAL FLUIDITY</div>
+      <h2 class="sec-title">The Flexibility Mindset: Edge to Multi-Cluster</h2>
+      <p class="sec-desc">
+        A single architectural philosophy scaling seamlessly from ultra-constrained embedded hardware to massive distributed multi-cluster datacenters.
+      </p>
+    </div>
+
+    <div class="flex-environments-grid">
+      
+      <div class="env-card">
+        <span class="env-badge">LOW-POWER EMBEDDED</span>
+        <h4>Embedded Edge Deployments</h4>
+        <p>
+          Engineered for robotics, industrial controllers, automotive systems, and IoT gateways. Operates in under 10MB of memory with microsecond response times and complete survivability in disconnected environments.
+        </p>
+      </div>
+
+      <div class="env-card">
+        <span class="env-badge">SINGLE-HOST DENSITY</span>
+        <h4>On-Premise Bare-Metal Hosts</h4>
+        <p>
+          Optimized for maximum density on single servers. Capable of hosting 100,000+ active agents per host through zero-copy pointer IPC and CPU cache alignment, banishing garbage collection overhead.
+        </p>
+      </div>
+
+      <div class="env-card">
+        <span class="env-badge">GLOBAL TOPOLOGIES</span>
+        <h4>Multi-Cluster Distributed Datacenters</h4>
+        <p>
+          Engineered for global enterprise clouds. Features active-active cross-region episodic memory replication, distributed Raft quorums, and multi-datacenter hybrid vector-graph sharding.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Swappable Threads Concept -->
+    <div class="swappable-threads-card">
+      <div class="sec-pill" style="margin-bottom: 0.5rem;">&lt;/&gt; COMPUTATIONAL SWAPPABILITY</div>
+      <h4>Agents as First-Class Schedulable Threads</h4>
+      <p style="color: var(--text-secondary); font-size: 0.98rem; line-height: 1.7;">
+        In the EIP ecosystem, an agent's reasoning core is treated as a modular, schedulable thread. The microkernel abstracts execution so that a single unified agent interface can seamlessly swap or combine reasoning substrates without re-architecting the host runtime or memory bus.
+      </p>
+
+      <div class="thread-quad-grid">
+        <div class="thread-quad-item">
+          <strong>Classical ML</strong>
+          <p>Executing sub-millisecond gradient-boosted decision trees, random forests, and linear models directly inside the hot-path.</p>
+        </div>
+        <div class="thread-quad-item">
+          <strong>Deep Learning (DL)</strong>
+          <p>Running local computer vision, audio feature extraction, and dense embeddings side-by-side with minimal memory overhead.</p>
+        </div>
+        <div class="thread-quad-item">
+          <strong>Reinforcement Learning (RL)</strong>
+          <p>Real-time Q-learning, policy evaluation, and reward optimization loops operating with strict deterministic bounds.</p>
+        </div>
+        <div class="thread-quad-item">
+          <strong>Generative AI (GenAI)</strong>
+          <p>Streaming multi-modal token generation, speculative decoding, and deep contextual reasoning via decoupled 16-token rings.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ═══════════════ SECTION 12: ENTERPRISE SECURITY & ISO STANDARDS ═══════════════ -->
+<section id="security">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; INDUSTRY STANDARDS &amp; CERTIFICATIONS</div>
+      <h2 class="sec-title">Enterprise Security &amp; Defense-in-Depth</h2>
+      <p class="sec-desc">
+        Security engineered from first principles: universal zero-trust architecture, hardware cryptographic boundaries, and compliance with accredited ISO/IEC frameworks.
+      </p>
+    </div>
+
+    <div class="security-grid">
+      
+      <div class="security-card">
+        <div class="security-icon">ZTA</div>
+        <h4>Zero-Trust Architecture (NIST SP 800-207)</h4>
+        <p>
+          Enforcing strict dynamic perimeter isolation, continuous cryptographic verification, and least-privilege role delegation across all agent runtime threads and tools.
+        </p>
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">ISO</div>
+        <h4>ISO/IEC 27001 &amp; 27701 Governance</h4>
+        <p>
+          Audited Information Security Management Systems (ISMS) and Privacy Information Management Systems ensuring data protection across all memory tiers and storage fabrics.
+        </p>
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">AI</div>
+        <h4>ISO/IEC 42001 (AI Management)</h4>
+        <p>
+          Adherence to the international benchmark for Artificial Intelligence Management Systems (AIMS), ensuring ethical safety boundaries, traceability, and prompt safety fencing.
+        </p>
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">HSM</div>
+        <h4>Hardware Security Module (FIPS 140-3)</h4>
+        <p>
+          Cryptographic keys remain isolated inside dedicated hardware security modules (PKCS#11). Machine models request signatures without private key material touching model memory.
+        </p>
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">SOC</div>
+        <h4>SOC 2 Type II Attestation</h4>
+        <p>
+          Operational controls verified across Security, Availability, and Confidentiality trust service criteria, backed by automated continuous monitoring telemetry.
+        </p>
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">CSF</div>
+        <h4>NIST Cybersecurity Framework 2.0</h4>
+        <p>
+          End-to-end incident response posture aligning with Identify, Protect, Detect, Respond, and Recover tiers with wire-speed eBPF packet inspection.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 13: ENTERPRISE SOFTWARE DEVELOPMENT REQUIREMENTS ═══════════════ -->
+<section id="enterprise-standards">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; RIGOROUS COMPLIANCE</div>
+      <h2 class="sec-title">Enterprise Software Development Standards</h2>
+      <p class="sec-desc">
+        The exhaustive certifications, software supply chain frameworks, and operational warranties required for software to enter Global 2000 enterprises, defense ministries, and tier-1 financial institutions.
+      </p>
+    </div>
+
+    <div class="reqs-quad-container">
+      
+      <div class="reqs-card">
+        <h4>Compliance &amp; Governance</h4>
+        <p>Meeting international criteria for data governance, confidentiality, and AI management.</p>
+        <ul class="reqs-list">
+          <li>SOC 2 Type II Audited Controls</li>
+          <li>ISO/IEC 27001 Information Security</li>
+          <li>ISO/IEC 42001 Artificial Intelligence</li>
+          <li>HIPAA &amp; GDPR Data Sovereignty</li>
+        </ul>
+      </div>
+
+      <div class="reqs-card">
+        <h4>Supply Chain Integrity</h4>
+        <p>Hardening software provenance against supply chain tampering and unauthorized modification.</p>
+        <ul class="reqs-list">
+          <li>SLSA Level 3/4 Framework Compliance</li>
+          <li>Cosign Cryptographic Binary Signing</li>
+          <li>CycloneDX / SPDX Verified SBOMs</li>
+          <li>Automated Zero-CVE SARIF Scans</li>
+        </ul>
+      </div>
+
+      <div class="reqs-card">
+        <h4>High Availability &amp; SLAs</h4>
+        <p>Architectural warranties ensuring uninterrupted operation under catastrophic host failures.</p>
+        <ul class="reqs-list">
+          <li>Five Nines (99.999%) Availability SLA</li>
+          <li>Deterministic Sub-Second MTTR Bounds</li>
+          <li>Active-Active Multi-Region Clustering</li>
+          <li>Zero-Downtime Live Hot-Patching</li>
+        </ul>
+      </div>
+
+      <div class="reqs-card">
+        <h4>Enterprise Federation</h4>
+        <p>Seamless integration with existing enterprise identity and security operations infrastructure.</p>
+        <ul class="reqs-list">
+          <li>RBAC/ABAC Directory Federation (SAML/OIDC)</li>
+          <li>Out-of-Band Unix Operator Sockets</li>
+          <li>OpenTelemetry / Syslog SOC Streaming</li>
+          <li>FIPS 140-3 Cryptographic Validation</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 14: THE 7 SOVEREIGN ENGINES PORTFOLIO ═══════════════ -->
+<section id="engines">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; PROVEN SYSTEMS PORTFOLIO</div>
+      <h2 class="sec-title">The Complete 7-Engine Architecture</h2>
+      <p class="sec-desc">
+        A unified, pure Go systems portfolio. From the flagship AgentOS microkernel nucleus to specialized satellite engines extending autonomous agent capabilities.
+      </p>
+    </div>
+
+    <!-- Flagship Nucleus -->
+    <div class="engine-flagship">
+      <div class="engine-flagship-head">
+        <div>
+          <span class="sec-pill" style="margin-bottom: 0.3rem;">FLAGSHIP NUCLEUS // AGENTOS MICROKERNEL</span>
+          <h3 class="engine-flagship-title">Enterprise Agentic Engine</h3>
+        </div>
+        <span style="font-family: var(--font-mono); font-size: 0.74rem; color: #0284c7; background: rgba(0, 210, 224, 0.12); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--cyan-border); font-weight: 700;">
+          PURE GO 1.25+ STATIC BINARY
+        </span>
+      </div>
+      <div class="engine-flagship-sub">High-Assurance AgentOS Microkernel Runtime</div>
+      <p class="engine-flagship-desc">
+        EAE is the master autonomous execution microkernel of the EIP platform. It coordinates multi-agent swarms, complex reasoning workflows, and enterprise tool invocation with massive single-server concurrency (100k+ agents per host), nanosecond zero-copy IPC, and defense-grade isolation without external runtime dependencies.
+      </p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem; background: var(--bg-inset); padding: 1.1rem; border-radius: 7px; border: 1px solid rgba(8, 145, 178, 0.15);">
+        <div style="font-size: 0.86rem; color: var(--text-secondary);"><strong>4.0 µs Spawn:</strong> Pre-compiled generic skeletons.</div>
+        <div style="font-size: 0.86rem; color: var(--text-secondary);"><strong>1.0 ns IPC:</strong> Zero-allocation atomic memory bus.</div>
+        <div style="font-size: 0.86rem; color: var(--text-secondary);"><strong>100% Pure Go:</strong> Zero-CGO hermetic static binary.</div>
+        <div style="font-size: 0.86rem; color: var(--text-secondary);"><strong>AI Convergence:</strong> LLM, ML, Dl, RL, Custom Functions</div>
+      </div>
+    </div>
+
+    <!-- 6 Satellites Grid -->
+    <div class="engine-satellites-grid">
+      
+      <!-- EBE -->
+      <div class="satellite-card">
+        <div>
+          <div class="sec-pill" style="margin-bottom: 0.4rem;">SATELLITE 01 // WEB3</div>
+          <h4 class="sat-code">EBE</h4>
+          <div class="sat-sub">Enterprise Blockchain Engine</div>
+          <p class="sat-desc">
+            Pure Go Ethereum engine integrating EAE for autonomous agent commerce, ERC-4337 smart account settlement, and HSM-signed ledgers without external node dependencies.
+          </p>
+        </div>
+        <div class="sat-specs-box">
+          <div>• ERC-4337 Smart Account Settlement</div>
+          <div>• Hardware PKCS#11 HSM Key Isolation</div>
+          <div>• Zero External Dynamic Dependencies</div>
+        </div>
+      </div>
+
+      <!-- ESE -->
+      <div class="satellite-card">
+        <div>
+          <div class="sec-pill" style="margin-bottom: 0.4rem;">SATELLITE 02 // DYNAMIC VM</div>
+          <h4 class="sat-code">ESE</h4>
+          <div class="sat-sub">Enterprise Scripting Engine</div>
+          <p class="sat-desc">
+            Embedded, fuel-throttled sandboxed bytecode VM running natively in Go. Allows dynamic workflow modifications and edge logic patches on live clusters without recompilation.
+          </p>
+        </div>
+        <div class="sat-specs-box">
+          <div>• Fuel-Throttled Bytecode Execution</div>
+          <div>• Zero-Downtime Dynamic Edge Patching</div>
+          <div>• Isolated Memory Execution Sandbox</div>
+        </div>
+      </div>
+
+      <!-- EKE -->
+      <div class="satellite-card">
+        <div>
+          <div class="sec-pill" style="margin-bottom: 0.4rem;">SATELLITE 03 // VECTOR + GRAPH</div>
+          <h4 class="sat-code">EKE</h4>
+          <div class="sat-sub">Enterprise Knowledge Engine</div>
+          <p class="sat-desc">
+            High-density vector-graph hybrid store designed for distributed multi-cluster sharding, persistent HNSW indexing, and cross-datacenter semantic replication.
+          </p>
+        </div>
+        <div class="sat-specs-box">
+          <div>• Fused HNSW Vectors + RDF Graphs</div>
+          <div>• Distributed Multi-Cluster Sharding</div>
+          <div>• Sub-2ms Local Semantic Recall</div>
+        </div>
+      </div>
+
+      <!-- EME -->
+      <div class="satellite-card">
+        <div>
+          <div class="sec-pill" style="margin-bottom: 0.4rem;">SATELLITE 04 // MEMORY FABRIC</div>
+          <h4 class="sat-code">EME</h4>
+          <div class="sat-sub">Enterprise Memory Engine</div>
+          <p class="sat-desc">
+            Externalized, distributed memory fabric with real-time compression, multi-tenant row encryption, and cross-worker episodic state synchronization across cloud regions.
+          </p>
+        </div>
+        <div class="sat-specs-box">
+          <div>• Multi-Tenant AES-256-GCM Encryption</div>
+          <div>• Active-Active Cross-Region Episodic Sync</div>
+          <div>• Streaming Zstandard Compression (-70%)</div>
+        </div>
+      </div>
+
+      <!-- ETE -->
+      <div class="satellite-card">
+        <div>
+          <div class="sec-pill" style="margin-bottom: 0.4rem;">SATELLITE 05 // INDUSTRIAL BROKER</div>
+          <h4 class="sat-code">ETE</h4>
+          <div class="sat-sub">Enterprise Tool Engine</div>
+          <p class="sat-desc">
+            Capability broker with automated JSON schema extraction, adaptive EMA circuit breaking, and native embedded bus drivers (CAN, Modbus, RS-485 serial).
+          </p>
+        </div>
+        <div class="sat-specs-box">
+          <div>• Native CAN, Modbus, RS-485 Bus Drivers</div>
+          <div>• Adaptive EMA Failure Circuit Breakers</div>
+          <div>• Automated Type-Safe Schema Reflection</div>
+        </div>
+      </div>
+
+      <!-- EGE -->
+      <div class="satellite-card">
+        <div>
+          <div class="sec-pill" style="margin-bottom: 0.4rem;">SATELLITE 06 // eBPF PERIMETER</div>
+          <h4 class="sat-code">EGE</h4>
+          <div class="sat-sub">Enterprise Gateway Engine</div>
+          <p class="sat-desc">
+            High-throughput ingress/egress proxy supporting 1.2M+ RPS per host, mutual TLS enforcement, token quotas, and Linux eBPF/XDP distributed rate limiting.
+          </p>
+        </div>
+        <div class="sat-specs-box">
+          <div>• 1.2M+ RPS Non-Blocking XDP Bypass</div>
+          <div>• Kernel-Enforced Hardware Rate Gates</div>
+          <div>• Zero-Trust Edge Mutual TLS (mTLS)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 15: OPEN-CODE TRANSPARENCY & BSL 1.1 LICENSING ═══════════════ -->
+<section id="open-code-licensing">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; SUSTAINABLE OPEN CORE</div>
+      <h2 class="sec-title">Open-Code Transparency &amp; Sustainable Licensing</h2>
+      <p class="sec-desc">
+        Eliminating the black box of artificial intelligence infrastructure while maintaining a sustainable commercial revenue engine that funds continuous development and 24/7 enterprise support.
+      </p>
+    </div>
+
+    <div class="license-card-box">
+      <div class="manifesto-copy">
+        <h3>Out of the Black Box: Why Source Visibility is Mandatory</h3>
+        <p>
+          Critical infrastructure must never depend on opaque proprietary binaries. When an autonomous system operates in healthcare, defense, or financial settlement, security teams, systems architects, and independent auditors must be able to inspect every line of code from bare-metal Go to microkernel drivers.
+        </p>
+      </div>
+
+      <div class="license-layout-grid">
+        <div class="license-col">
+          <h4>BSL 1.1</h4>
+          <p>
+            All core repositories under <strong>github.com/eip-labs</strong> are published under the Business Source License 1.1 (BSL 1.1). Developers, researchers, and technical architects have complete access to inspect, benchmark, compile, and prototype without fees. Every release carries an automated 4-year sunset transitioning the code into open-source (LGPL v3).
+          </p>
+        </div>
+
+        <div class="license-col">
+          <h4>Commercial Enterprise Licensing</h4>
+          <p>
+            Organizations deploying EIP-Labs engines into revenue-generating, customer-facing, or mission-critical production environments license the software commercially. This revenue model directly funds ongoing systems R&amp;D, continuous independent security audits, bespoke driver development, and dedicated 24/7 SLA escalation desks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 16: GLOBAL SCIENTIFIC & ACADEMIC COLLABORATION ═══════════════ -->
+<section id="academic-collaboration">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; GLOBAL RESEARCH COMMUNITY</div>
+      <h2 class="sec-title">Academic &amp; Non-Profit Collaboration</h2>
+      <p class="sec-desc">
+        Democratizing high-assurance systems engineering for scientific discovery while rigorously protecting commercial enterprise rights.
+      </p>
+    </div>
+
+    <div class="collab-grid">
+      
+      <div class="collab-card">
+        <h4>100% Free Academic Grants</h4>
+        <p>
+          We provide unrestricted, royalty-free licensing grants for accredited universities, doctoral researchers, student laboratories, and academic institutions worldwide. Our full software stack is freely available for teaching, academic benchmarking, and peer-reviewed research.
+        </p>
+      </div>
+
+      <div class="collab-card">
+        <h4>Non-Profit &amp; Public Benefit</h4>
+        <p>
+          Public-benefit non-profit organizations, environmental researchers, and civic computing initiatives receive full access to EIP-Labs infrastructure with dedicated community guidance, ensuring that high-assurance AI tools remain accessible for the public good.
+        </p>
+      </div>
+
+      <div class="collab-card">
+        <h4>Openness with Commercial Protection</h4>
+        <p>
+          Our licensing is designed with clarity: we champion complete scientific openness and accessibility for education and discovery, while maintaining strict legal protections for commercial enterprise deployments so our enterprise clients deploy with absolute certainty.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 17: COMMERCIAL COLLABORATION & ENTERPRISE PARTNERSHIPS ═══════════════ -->
+<section id="commercial-collaboration">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-pill">&lt;/&gt; STRATEGIC ALLIANCES</div>
+      <h2 class="sec-title">Commercial Collaboration &amp; Enterprise Partnerships</h2>
+      <p class="sec-desc">
+        Providing global enterprises, industrial conglomerates, and defense institutions with structured co-development frameworks, mission-critical licensing, and dedicated SLA bindings.
+      </p>
+    </div>
+
+    <div class="commercial-card-box">
+      <div class="manifesto-copy">
+        <h3>Enterprise Co-Development &amp; Bespoke Architecture</h3>
+        <p>
+          EIP-Labs partners with your organization on commercial co-development, licensing, and long-term systems engineering under clear SLAs — direct collaboration from architecture through production support.
+        </p>
+      </div>
+
+      <div class="commercial-routing-grid" style="grid-template-columns: 1fr;">
+        <div class="routing-tile">
+          <div>
+            <h5>General Corporate Partnerships</h5>
+            <p>For strategic enterprise software licensing, global cloud provider alliances, and commercial distribution contracts.</p>
+          </div>
+          <a href="mailto:contact@eip-technologies.com" class="routing-mail-link">
+            contact@eip-technologies.com &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ═══════════════ SECTION 18: DEDICATED LABORATORY SYSTEMS R&D ═══════════════ -->
+<section id="lab-rd">
+  <div class="container">
+    <div class="advisory-box">
+      <div class="sec-pill">&lt;/&gt; DIRECT LABORATORY ENGAGEMENT</div>
+      <h3>Dedicated Laboratory Systems R&amp;D</h3>
+      <p>
+        For CTOs, Principal Systems Architects, and Technical Directors seeking bespoke kernel driver engineering, chaos harness audits, hardware-level SCADA bridges, sovereign cluster engineering, or migration from legacy Python frameworks.
+      </p>
+
+      <div class="advisory-models-grid">
+        <div class="advisory-model-cell">
+          <h5>Python to Pure-Go Modernization</h5>
+          <p>Systematically refactoring brittle LangChain/CrewAI wrappers into deterministic, zero-allocation Go microkernel processes.</p>
+        </div>
+        <div class="advisory-model-cell">
+          <h5>Bespoke Satellite Co-Development</h5>
+          <p>Architecting custom runtime extensions and embedded drivers for proprietary hardware buses, avionics, or specialized protocols.</p>
+        </div>
+        <div class="advisory-model-cell">
+          <h5>Air-Gapped Sovereign Blueprinting</h5>
+          <p>Designing zero-trust, network-isolated cluster architectures for defense, national intelligence, and sovereign data centers.</p>
+        </div>
+      </div>
+
+      <div class="dual-contact-triggers">
+        <a href="mailto:labs@eip-technologies.com" class="advisory-email-trigger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          labs@eip-technologies.com
+        </a>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); margin-top: 0.8rem;">
+        Direct inquiries reviewed by Principal Systems Architects within 24 hours.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 19: ENTERPRISE FOOTER & RUNTIME MANIFEST ═══════════════ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="brand-group" style="margin-bottom: 0.8rem;">
+          <div class="brand-icon-box"><span>&lt;/&gt;</span></div>
+          <div class="brand-text">EIP-LABS</div>
+        </div>
+        <p class="footer-brand-p">
+          EIP-Labs is the foundational Systems Research and Development laboratory of EIP-Technologies. 
+          Pioneering high-assurance AgentOS microkernels, distributed state fabrics, and autonomous runtime infrastructure from line zero.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Architecture</h4>
+        <ul class="footer-links">
+          <li><a href="#disciplines">5 Engineering Pillars</a></li>
+          <li><a href="#research-lifecycle">Applied Research</a></li>
+          <li><a href="#pmlc">Product Life Cycle</a></li>
+          <li><a href="#ai-architecture-adrs">AI Architecting</a></li>
+          <li><a href="#vibe-architecting">Vibe Architecting</a></li>
+          <li><a href="#sdlc">Standard SDLC</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Systems Portfolio</h4>
+        <ul class="footer-links">
+          <li><a href="#cicd-pipelines">CI/CD Pipelines</a></li>
+          <li><a href="#agentic-ai-dev">Agentic AI Design</a></li>
+          <li><a href="#flexibility-mindset">Flexibility Mindset</a></li>
+          <li><a href="#engines">Enterprise Agentic Engine</a></li>
+          <li><a href="#engines">Satellite Engines</a></li>
+          <li><a href="#security">ISO Standards &amp; Security</a></li>
+          <li><a href="#enterprise-standards">Compliance Requirements</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Governance &amp; Desk</h4>
+        <ul class="footer-links">
+          <li><a href="#open-code-licensing">BSL 1.1 Licensing</a></li>
+          <li><a href="#academic-collaboration">Academic Grants</a></li>
+          <li><a href="#commercial-collaboration">Commercial Alliances</a></li>
+          <li><a href="#lab-rd">Laboratory R&amp;D</a></li>
+          <li><a href="mailto:contact@eip-technologies.com">contact@eip-technologies.com</a></li>
+          <li><a href="mailto:labs@eip-technologies.com">labs@eip-technologies.com</a></li>
+          <li><a href="https://www.linkedin.com/company/eip-labs" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>&copy; 2026 EIP-Labs • Systems Research &amp; Development Laboratory of EIP-Technologies. All Rights Reserved.</div>
+      <div>PURE GO 1.25+ RUNTIME // ZERO-CGO // BSL 1.1</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DYNAMIC SYSTEMS CANVAS PHYSICS ENGINE
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function initSchematicCanvas() {
+  const canvas = document.getElementById('schematic-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let w = (canvas.width = window.innerWidth);
+  let h = (canvas.height = window.innerHeight);
+
+  window.addEventListener('resize', () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  });
+
+  const mouse = { x: -1000, y: -1000 };
+  window.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  const nodes = [];
+  const nodeCount = 50;
+
+  for (let i = 0; i < nodeCount; i++) {
+    nodes.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      radius: 1.8 + Math.random() * 2
+    });
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Update and draw nodes
+    for (let i = 0; i < nodeCount; i++) {
+      const n = nodes[i];
+      n.x += n.vx;
+      n.y += n.vy;
+
+      if (n.x < 0 || n.x > w) n.vx *= -1;
+      if (n.y < 0 || n.y > h) n.vy *= -1;
+
+      // Gentle mouse interaction
+      const dx = mouse.x - n.x;
+      const dy = mouse.y - n.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        n.x -= (dx / dist) * 1.5;
+        n.y -= (dy / dist) * 1.5;
+      }
+
+      ctx.fillStyle = 'rgba(8, 145, 178, 0.45)';
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inter-node connections
+      for (let j = i + 1; j < nodeCount; j++) {
+        const n2 = nodes[j];
+        const dxx = n.x - n2.x;
+        const dyy = n.y - n2.y;
+        const d = Math.sqrt(dxx * dxx + dyy * dyy);
+
+        if (d < 140) {
+          ctx.strokeStyle = `rgba(0, 210, 224, ${0.18 * (1 - d / 140)})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(n.x, n.y);
+          ctx.lineTo(n2.x, n2.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
