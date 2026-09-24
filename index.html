@@ -832,46 +832,7 @@ nav {
   line-height: 1.6;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SECTION 6: PRODUCT MANAGEMENT LIFE CYCLE (PMLC)
-   ═══════════════════════════════════════════════════════════════ */
-.pmlc-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 1.6rem;
-}
-
-.pmlc-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--cyan-border);
-  border-radius: 11px;
-  padding: 1.8rem;
-  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.04);
-  transition: all 0.25s var(--ease-spring);
-  position: relative;
-  overflow: hidden;
-}
-
-.pmlc-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 3px;
-  background: linear-gradient(90deg, var(--cyan-primary), #0284c7);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.pmlc-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--cyan-primary);
-  box-shadow: 0 10px 25px rgba(0, 210, 224, 0.1);
-}
-
-.pmlc-card:hover::before {
-  opacity: 1;
-}
-
+/* Shared step/badge label used across sections */
 .pmlc-step {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -884,19 +845,6 @@ nav {
   margin-bottom: 0.7rem;
 }
 
-.pmlc-title {
-  font-family: var(--font-display);
-  font-size: 1.12rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.pmlc-desc {
-  font-size: 0.92rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    SECTION 7: AI SOFTWARE ARCHITECTING
@@ -2522,58 +2470,43 @@ nav {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SECTION 18: COMMERCIAL COLLABORATION & ENTERPRISE PARTNERSHIPS
+   SECTION 17: COMMERCIAL COLLABORATION
    ═══════════════════════════════════════════════════════════════ */
-.commercial-card-box {
-  background: var(--bg-surface-elevated);
-  border: 1.5px solid var(--cyan-primary);
+.commercial-dark-box {
+  background: linear-gradient(135deg, #0b1329 0%, #0a1f44 55%, #082f5c 100%);
+  border: 1.5px solid rgba(0, 210, 224, 0.45);
   border-radius: 14px;
   padding: 3rem;
-  box-shadow: 0 14px 40px rgba(0, 210, 224, 0.08);
+  box-shadow: 0 14px 40px rgba(0, 210, 224, 0.12),
+              0 0 0 1px rgba(0, 210, 224, 0.08);
+  text-align: center;
 }
 
-.commercial-routing-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.8rem;
-  margin-top: 2rem;
+.commercial-dark-box .sec-pill {
+  background: rgba(0, 210, 224, 0.14);
+  color: var(--cyan-primary);
+  border: 1px solid rgba(0, 210, 224, 0.35);
 }
 
-.routing-tile {
-  background: var(--bg-inset);
-  border: 1px solid var(--cyan-border);
-  border-radius: 10px;
-  padding: 1.8rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.commercial-dark-box .sec-title {
+  color: var(--cyan-primary);
 }
 
-.routing-tile h5 {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  margin-bottom: 0.4rem;
+.commercial-dark-box .sec-desc {
+  color: rgba(226, 232, 240, 0.9);
+  margin-bottom: 1.8rem;
 }
 
-.routing-tile p {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 1.2rem;
+.commercial-dark-box .advisory-email-trigger {
+  background: rgba(0, 210, 224, 0.12);
+  border: 1px solid rgba(0, 210, 224, 0.45);
+  color: var(--cyan-primary);
 }
 
-.routing-mail-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--cyan-deep);
-  text-decoration: none;
-  border-bottom: 1.5px dashed var(--cyan-deep);
-  padding-bottom: 2px;
+.commercial-dark-box .advisory-email-trigger:hover {
+  background: rgba(0, 210, 224, 0.22);
+  border-color: var(--cyan-primary);
+  box-shadow: 0 6px 20px rgba(0, 210, 224, 0.22);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2602,35 +2535,6 @@ nav {
   max-width: 800px;
   margin: 0 auto 1.8rem;
   line-height: 1.75;
-}
-
-.advisory-models-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.4rem;
-  margin-bottom: 2.2rem;
-  text-align: left;
-}
-
-.advisory-model-cell {
-  background: #ffffff;
-  border: 1px solid var(--cyan-border);
-  border-radius: 8px;
-  padding: 1.3rem;
-}
-
-.advisory-model-cell h5 {
-  font-family: var(--font-display);
-  font-size: 0.92rem;
-  color: var(--cyan-deep);
-  margin-bottom: 3px;
-}
-
-.advisory-model-cell p {
-  font-size: 0.86rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin-bottom: 0;
 }
 
 .dual-contact-triggers {
@@ -2747,10 +2651,7 @@ footer {
 .satellite-card,
 .license-card-box,
 .collab-card,
-.commercial-card-box,
-.routing-tile,
 .advisory-box,
-.advisory-model-cell,
 .thread-quad-item {
   transition: transform 0.3s var(--ease-spring),
               border-color 0.3s ease,
@@ -2769,10 +2670,7 @@ footer {
 .satellite-card:hover,
 .license-card-box:hover,
 .collab-card:hover,
-.commercial-card-box:hover,
-.routing-tile:hover,
 .advisory-box:hover,
-.advisory-model-cell:hover,
 .thread-quad-item:hover {
   border-color: var(--cyan-primary);
   box-shadow: 0 10px 32px var(--cyan-glow),
@@ -2788,7 +2686,6 @@ footer {
   .pillar-content-grid { grid-template-columns: 1fr; }
   .research-grid-dual { grid-template-columns: 1fr; }
   .license-layout-grid { grid-template-columns: 1fr; }
-  .commercial-routing-grid { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
   .agentic-uniform-grid { grid-template-columns: 1fr; }
   .sdlc-flow::before { left: 16px; }
@@ -2826,7 +2723,6 @@ footer {
     <li><a href="#manifesto">Manifesto</a></li>
     <li><a href="#disciplines">5 Pillars</a></li>
     <li><a href="#research-lifecycle">Research</a></li>
-    <li><a href="#pmlc">PMLC</a></li>
     <li><a href="#ai-architecture-adrs">AI Architecting</a></li>
     <li><a href="#vibe-architecting">Vibe Architecting</a></li>
     <li><a href="#agentic-ai-dev">Agentic AI</a></li>
@@ -3125,70 +3021,6 @@ footer {
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-<!-- ═══════════════ SECTION 5: PRODUCT MANAGEMENT LIFE CYCLE (PMLC) ═══════════════ -->
-<section id="pmlc">
-  <div class="container">
-    <div class="sec-header">
-      <div class="sec-pill">&lt;/&gt; PRODUCT STRATEGY &amp; GOVERNANCE</div>
-      <h2 class="sec-title">The Product Management Life Cycle (PMLC)</h2>
-      <p class="sec-desc">
-        How EIP-Labs identifies systemic industry bottlenecks, formalizes rigorous requirements, and stewards high-assurance runtime products from strategic discovery through enterprise release.
-      </p>
-    </div>
-
-    <div class="pmlc-grid">
-      
-      <div class="pmlc-card">
-        <span class="pmlc-step">PHASE 01 // DISCOVERY</span>
-        <h4 class="pmlc-title">Market &amp; Structural Problem Discovery</h4>
-        <p class="pmlc-desc">
-          Systematically identifying structural failure points in existing computing abstractions—such as serialization overhead, unbounded GC latency, and non-deterministic agent prompt chains—to identify where native microkernel primitives are mandatory.
-        </p>
-      </div>
-
-      <div class="pmlc-card">
-        <span class="pmlc-step">PHASE 02 // SPECIFICATION</span>
-        <h4 class="pmlc-title">Formal PRD &amp; Invariant Definition</h4>
-        <p class="pmlc-desc">
-          Drafting rigorous Product Requirements Documents (PRD) defining strict non-functional constraints: microsecond latency ceilings, zero heap allocation budgets, hardware cgroup boundaries, and fail-closed security guarantees.
-        </p>
-      </div>
-
-      <div class="pmlc-card">
-        <span class="pmlc-step">PHASE 03 // TIERING</span>
-        <h4 class="pmlc-title">Open-Core Roadmapping &amp; Licensing Strategy</h4>
-        <p class="pmlc-desc">
-          Partitioning architecture cleanly into open-core runtime foundations (available under BSL 1.1 for developer audit and research) versus proprietary sovereign enterprise modules (dedicated HSM enclaves, multi-region state fabrics).
-        </p>
-      </div>
-
-      <div class="pmlc-card">
-        <span class="pmlc-step">PHASE 04 // EXPERIENCE</span>
-        <h4 class="pmlc-title">Developer Velocity &amp; DX Curation</h4>
-        <p class="pmlc-desc">
-          Designing ergonomic abstractions such as the type-safe iiCode DSL. Ensuring that high-performance, zero-allocation Go hot-paths are intuitive, eliminating complex boilerplate while enforcing compile-time correctness.
-        </p>
-      </div>
-
-      <div class="pmlc-card">
-        <span class="pmlc-step">PHASE 05 // GTM</span>
-        <h4 class="pmlc-title">Commercial Alignment &amp; Enterprise Pilots</h4>
-        <p class="pmlc-desc">
-          Structuring high-touch sovereign proof-of-concept deployments across defense, fintech, and critical infrastructure sectors. Validating empirical SLA benchmarks under client-specific operational traffic.
-        </p>
-      </div>
-
-      <div class="pmlc-card">
-        <span class="pmlc-step">PHASE 06 // STEWARDSHIP</span>
-        <h4 class="pmlc-title">Long-Term Governance &amp; Sunset Automation</h4>
-        <p class="pmlc-desc">
-          Governing semantic versioning freeze warranties (ensuring 5+ years ABI stability for critical drivers) and managing the automated 4-year conversion timeline transitioning BSL 1.1 codebases into open-source LGPL.
-        </p>
-      </div>
-
     </div>
   </div>
 </section>
@@ -4714,35 +4546,21 @@ footer {
     </div>
   </div>
 </section>
-<!-- ═══════════════ SECTION 17: COMMERCIAL COLLABORATION & ENTERPRISE PARTNERSHIPS ═══════════════ -->
+<!-- ═══════════════ SECTION 17: COMMERCIAL COLLABORATION ═══════════════ -->
 <section id="commercial-collaboration">
   <div class="container">
-    <div class="sec-header">
+    <div class="commercial-dark-box">
       <div class="sec-pill">&lt;/&gt; STRATEGIC ALLIANCES</div>
-      <h2 class="sec-title">Commercial Collaboration &amp; Enterprise Partnerships</h2>
+      <h2 class="sec-title">Commercial Collaboration</h2>
       <p class="sec-desc">
-        Providing global enterprises, industrial conglomerates, and defense institutions with structured co-development frameworks, mission-critical licensing, and dedicated SLA bindings.
+        Commercial and Custom Licensing: Inquiries about commercial collaboration and enterprise partnerships.
       </p>
-    </div>
 
-    <div class="commercial-card-box">
-      <div class="manifesto-copy">
-        <h3>Enterprise Co-Development &amp; Bespoke Architecture</h3>
-        <p>
-          EIP-Labs partners with your organization on commercial co-development, licensing, and long-term systems engineering under clear SLAs — direct collaboration from architecture through production support.
-        </p>
-      </div>
-
-      <div class="commercial-routing-grid" style="grid-template-columns: 1fr;">
-        <div class="routing-tile">
-          <div>
-            <h5>General Corporate Partnerships</h5>
-            <p>For strategic enterprise software licensing, global cloud provider alliances, and commercial distribution contracts.</p>
-          </div>
-          <a href="mailto:contact@eip-technologies.com" class="routing-mail-link">
-            contact@eip-technologies.com &rarr;
-          </a>
-        </div>
+      <div class="dual-contact-triggers">
+        <a href="mailto:contact@eip-technologies.com" class="advisory-email-trigger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          contact@eip-technologies.com
+        </a>
       </div>
     </div>
   </div>
@@ -4754,32 +4572,14 @@ footer {
       <div class="sec-pill">&lt;/&gt; DIRECT LABORATORY ENGAGEMENT</div>
       <h3>Dedicated Laboratory Systems R&amp;D</h3>
       <p>
-        For CTOs, Principal Systems Architects, and Technical Directors seeking bespoke kernel driver engineering, chaos harness audits, hardware-level SCADA bridges, sovereign cluster engineering, or migration from legacy Python frameworks.
+        Inquiries about research and development for non-commercial and open-source projects.
       </p>
-
-      <div class="advisory-models-grid">
-        <div class="advisory-model-cell">
-          <h5>Python to Pure-Go Modernization</h5>
-          <p>Systematically refactoring brittle LangChain/CrewAI wrappers into deterministic, zero-allocation Go microkernel processes.</p>
-        </div>
-        <div class="advisory-model-cell">
-          <h5>Bespoke Satellite Co-Development</h5>
-          <p>Architecting custom runtime extensions and embedded drivers for proprietary hardware buses, avionics, or specialized protocols.</p>
-        </div>
-        <div class="advisory-model-cell">
-          <h5>Air-Gapped Sovereign Blueprinting</h5>
-          <p>Designing zero-trust, network-isolated cluster architectures for defense, national intelligence, and sovereign data centers.</p>
-        </div>
-      </div>
 
       <div class="dual-contact-triggers">
         <a href="mailto:labs@eip-technologies.com" class="advisory-email-trigger">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           labs@eip-technologies.com
         </a>
-      </div>
-      <div style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); margin-top: 0.8rem;">
-        Direct inquiries reviewed by Principal Systems Architects within 24 hours.
       </div>
     </div>
   </div>
@@ -4805,7 +4605,6 @@ footer {
         <ul class="footer-links">
           <li><a href="#disciplines">5 Engineering Pillars</a></li>
           <li><a href="#research-lifecycle">Applied Research</a></li>
-          <li><a href="#pmlc">Product Life Cycle</a></li>
           <li><a href="#ai-architecture-adrs">AI Architecting</a></li>
           <li><a href="#vibe-architecting">Vibe Architecting</a></li>
           <li><a href="#sdlc">Standard SDLC</a></li>
